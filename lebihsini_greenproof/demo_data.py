@@ -16,16 +16,24 @@ class DemoDataset:
     demand: DemandRequest
     material_resources: list[MaterialResourcePassport]
     equipment_resources: list[EquipmentResourcePassport]
+    commercial_equipment_fallback: EquipmentResourcePassport
     commercial_equipment_rental_daily_myr: float
     supplier_unit_price_myr: float
+    supplier_available_from_at: str
+    supplier_delivery_lead_time_minutes: int
     supplier_delivery_cost_myr: float
     supplier_delivery_distance_km: float
+    supplier_vehicle_factor_kgco2e_per_km: float
     disposal_or_storage_cost_myr: float
     disposal_or_storage_carbon_kgco2e: float
     inspection_cost_per_amber_resource_myr: float
     additional_handling_cost_myr: float
     platform_fee_myr: float
     expected_delay_cost_myr: float
+    material_collection_buffer_minutes: int
+    equipment_collection_buffer_minutes: int
+    equipment_return_buffer_minutes: int
+    reuse_processing_carbon_kgco2e: float
 
 
 def load_demo_dataset() -> DemoDataset:
@@ -195,6 +203,7 @@ def load_demo_dataset() -> DemoDataset:
             operator_required=False,
             risk_category=RiskCategory.GREEN,
             verification_status=VerificationStatus.VERIFIED,
+            is_commercial_fallback=False,
             evidence_notes=["Maintenance record present.", "Available for three days."],
         ),
         EquipmentResourcePassport(
@@ -219,22 +228,57 @@ def load_demo_dataset() -> DemoDataset:
             operator_required=False,
             risk_category=RiskCategory.GREEN,
             verification_status=VerificationStatus.VERIFIED,
+            is_commercial_fallback=False,
             evidence_notes=["Included as an unavailable fallback example."],
         ),
     ]
+
+    commercial_equipment_fallback = EquipmentResourcePassport(
+        resource_id="eq-commercial-fallback",
+        site_id="commercial-rental",
+        site_name="Commercial Equipment Rental",
+        category="tile_cutter",
+        brand_model="Commercial Tile Cutter",
+        owner="Commercial Rental Partner",
+        availability_start_at="2026-06-20T06:00:00+08:00",
+        availability_end_at="2026-06-23T23:00:00+08:00",
+        collection_window_start_at="2026-06-20T06:00:00+08:00",
+        collection_window_end_at="2026-06-23T23:00:00+08:00",
+        rental_rate_myr_per_day=120.0,
+        commercial_rental_rate_myr_per_day=120.0,
+        distance_to_site_km=12.0,
+        travel_time_to_site_minutes=35,
+        transport_rate_myr_per_km=4.0,
+        vehicle_factor_kgco2e_per_km=0.27,
+        maintenance_record_present=True,
+        maintenance_confidence=1.0,
+        operator_required=False,
+        risk_category=RiskCategory.GREEN,
+        verification_status=VerificationStatus.VERIFIED,
+        is_commercial_fallback=True,
+        evidence_notes=["Structured commercial fallback for demo continuity."],
+    )
 
     return DemoDataset(
         demand=demand,
         material_resources=material_resources,
         equipment_resources=equipment_resources,
+        commercial_equipment_fallback=commercial_equipment_fallback,
         commercial_equipment_rental_daily_myr=120.0,
         supplier_unit_price_myr=4.60,
+        supplier_available_from_at="2026-06-21T06:00:00+08:00",
+        supplier_delivery_lead_time_minutes=60,
         supplier_delivery_cost_myr=90.0,
         supplier_delivery_distance_km=18.0,
+        supplier_vehicle_factor_kgco2e_per_km=0.27,
         disposal_or_storage_cost_myr=20.0,
         disposal_or_storage_carbon_kgco2e=8.0,
         inspection_cost_per_amber_resource_myr=25.0,
         additional_handling_cost_myr=30.0,
         platform_fee_myr=15.0,
         expected_delay_cost_myr=0.0,
+        material_collection_buffer_minutes=10,
+        equipment_collection_buffer_minutes=5,
+        equipment_return_buffer_minutes=5,
+        reuse_processing_carbon_kgco2e=5.0,
     )

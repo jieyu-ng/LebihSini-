@@ -7,7 +7,7 @@ from typing import Any
 
 
 MALAYSIA_TIMEZONE = "Asia/Kuala_Lumpur"
-CALCULATION_VERSION = "foundation-v0.1"
+CALCULATION_VERSION = "optimisation-engine-v1"
 
 
 class ResourceKind(StrEnum):
@@ -33,6 +33,7 @@ class Verdict(StrEnum):
     GREENPROOF_RECOMMENDED = "greenproof_recommended"
     NORMAL_PROCUREMENT_RECOMMENDED = "normal_procurement_recommended"
     PARTIAL_REUSE_RECOMMENDED = "partial_reuse_recommended"
+    MANUAL_REVIEW_REQUIRED = "manual_review_required"
 
 
 class ApprovalDecisionType(StrEnum):
@@ -168,6 +169,7 @@ class EquipmentResourcePassport:
     operator_required: bool
     risk_category: RiskCategory
     verification_status: VerificationStatus
+    is_commercial_fallback: bool = False
     evidence_notes: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -227,6 +229,7 @@ class SelectedEquipment:
     category: str
     duration_days: int
     rental_cost_myr: float
+    is_commercial_fallback: bool = False
     conditions: list[str] = field(default_factory=list)
 
 
@@ -238,6 +241,7 @@ class ExcludedResource:
     reason_code: str
     reason_text: str
     confidence: float
+    evidence_notes: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
         _assert_confidence(self.confidence)
@@ -272,8 +276,12 @@ class CarbonBreakdown:
     material_carbon_factor_kgco2e_per_unit: float
     vehicle_factor_kgco2e_per_km: float
     quantity_units: int
+    new_material_shortfall_units: int
+    avoided_embodied_carbon_kgco2e: float
+    supplier_delivery_carbon_kgco2e: float
     transport_distance_km: float
     number_of_trips: int
+    transfer_transport_carbon_kgco2e: float
     processing_carbon_kgco2e: float
     baseline_carbon_kgco2e: float
     greenproof_carbon_kgco2e: float

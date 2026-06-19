@@ -1,21 +1,26 @@
 {
   "assumptions": [
     "Estimated using stated cost and carbon assumptions.",
-    "This reference flow is a foundation validator, not the final optimiser."
+    "Deadline feasibility uses deterministic precomputed travel times plus simple collection buffers.",
+    "Supplier F is treated as a structured fallback with prepared delivery assumptions."
   ],
-  "calculation_version": "foundation-v0.1",
+  "calculation_version": "optimisation-engine-v1",
   "carbon_breakdown": {
     "assumptions": [
       "Transport carbon is estimated from distance x vehicle factor x trip count.",
       "All carbon values are estimates using fictional demo assumptions."
     ],
+    "avoided_embodied_carbon_kgco2e": 774.0,
     "baseline_carbon_kgco2e": 912.86,
     "greenproof_carbon_kgco2e": 146.12,
     "material_carbon_factor_kgco2e_per_unit": 1.8,
     "net_carbon_avoided_kgco2e": 766.74,
+    "new_material_shortfall_units": 70,
     "number_of_trips": 2,
     "processing_carbon_kgco2e": 5.0,
     "quantity_units": 500,
+    "supplier_delivery_carbon_kgco2e": 4.86,
+    "transfer_transport_carbon_kgco2e": 15.12,
     "transport_distance_km": 28.0,
     "unit": "kgCO2e",
     "vehicle_factor_kgco2e_per_km": 0.27
@@ -24,7 +29,7 @@
     "Manual inspection required before this resource can be approved.",
     "Supplier fallback added to fulfil the remaining quantity."
   ],
-  "confidence": 0.89,
+  "confidence": 0.91,
   "cost_breakdown": {
     "additional_handling_cost_myr": 30.0,
     "assumptions": [
@@ -34,12 +39,12 @@
     "commercial_equipment_rental_myr": 240.0,
     "currency": "MYR",
     "disposal_or_storage_cost_myr": 20.0,
-    "equipment_cost_myr": 120.0,
+    "equipment_cost_myr": 156.0,
     "expected_delay_cost_myr": 0.0,
-    "greenproof_total_myr": 1974.0,
-    "gross_saving_myr": 748.0,
+    "greenproof_total_myr": 2010.0,
+    "gross_saving_myr": 712.0,
     "inspection_cost_myr": 25.0,
-    "net_saving_myr": 676.0,
+    "net_saving_myr": 640.0,
     "new_material_cost_myr": 2300.0,
     "new_material_shortfall_cost_myr": 322.0,
     "normal_procurement_baseline_myr": 2650.0,
@@ -47,30 +52,41 @@
     "reuse_transfer_cost_myr": 1350.0,
     "reuse_transport_cost_myr": 112.0,
     "supplier_delivery_cost_myr": 90.0,
-    "working_capital_protected_myr": 676.0
+    "working_capital_protected_myr": 640.0
   },
   "deadline_met": true,
   "excluded_resources": [
     {
       "confidence": 0.41,
-      "reason_code": "material_ineligible",
-      "reason_text": "Product specification is incompatible with the request. Risk exceeds the allowed tolerance. Excluded from automatic recommendation because required documentation was absent. Excluded from automatic recommendation because the product label was unreadable and the condition could not be sufficiently verified.",
+      "evidence_notes": [
+        "Product label unreadable.",
+        "Stored outdoors.",
+        "Specification cannot be confidently confirmed."
+      ],
+      "reason_code": "responsible_ai_policy",
+      "reason_text": "Excluded from automatic recommendation because the product label was unreadable and the condition could not be sufficiently verified.",
       "resource_id": "mat-site-e-tiles",
       "site_id": "site-e",
       "site_name": "Site E - Kinrara"
     },
     {
       "confidence": 0.95,
-      "reason_code": "material_ineligible",
-      "reason_text": "Product specification is incompatible with the request. Dimensions do not match the request. Reuse was not recommended because the delivery deadline could not be met.",
+      "evidence_notes": [
+        "Included as a deterministic mismatch test resource."
+      ],
+      "reason_code": "product_code_mismatch",
+      "reason_text": "Excluded because the product specification does not match the request.",
       "resource_id": "mat-site-g-wrong-size",
       "site_id": "site-g",
       "site_name": "Site G - Shah Alam"
     },
     {
       "confidence": 0.9,
-      "reason_code": "equipment_ineligible",
-      "reason_text": "Reuse was not recommended because the delivery deadline could not be met.",
+      "evidence_notes": [
+        "Included as an unavailable fallback example."
+      ],
+      "reason_code": "distance_exceeded",
+      "reason_text": "Excluded because the source exceeds the maximum allowed distance.",
       "resource_id": "eq-site-h-unavailable",
       "site_id": "site-h",
       "site_name": "Site H - Klang"
@@ -79,13 +95,17 @@
   "quantity_fulfilled_units": 500,
   "reasons": [
     "Partial reuse recommended because it reduced new purchasing while keeping the plan feasible.",
-    "Supplier fallback added to fulfil the remaining quantity."
+    "Supplier F filled the remaining quantity after eligible reuse sources were exhausted.",
+    "Estimated total cost remains lower than normal procurement.",
+    "Estimated carbon remains lower than normal procurement after transport.",
+    "Collection and delivery remain feasible within the current deadline."
   ],
   "recommendation_id": "rec-tomorrow-deadline",
   "selected_equipment": {
     "category": "tile_cutter",
     "conditions": [],
     "duration_days": 2,
+    "is_commercial_fallback": false,
     "rental_cost_myr": 120.0,
     "resource_id": "eq-site-d-cutter",
     "site_id": "site-d",

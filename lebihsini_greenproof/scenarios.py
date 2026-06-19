@@ -2,12 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from lebihsini_greenproof.foundation import ScenarioConfig
+from lebihsini_greenproof.urgency import RecommendationScenario
 
 
 @dataclass(slots=True)
 class ScenarioExpectation:
-    scenario: ScenarioConfig
+    scenario: RecommendationScenario
     expected_material_ids: tuple[str, ...]
     expected_excluded_ids: tuple[str, ...]
     expected_supplier_shortfall_units: int
@@ -16,9 +16,8 @@ class ScenarioExpectation:
 
 SCENARIO_FIXTURES = {
     "tomorrow_deadline": ScenarioExpectation(
-        scenario=ScenarioConfig(
+        scenario=RecommendationScenario(
             scenario_id="tomorrow-deadline",
-            lead_time_limit_minutes=60,
         ),
         expected_material_ids=("mat-site-a-tiles", "mat-site-b-tiles"),
         expected_excluded_ids=("mat-site-e-tiles", "mat-site-g-wrong-size", "eq-site-h-unavailable"),
@@ -26,9 +25,9 @@ SCENARIO_FIXTURES = {
         expected_equipment_id="eq-site-d-cutter",
     ),
     "three_hour_deadline": ScenarioExpectation(
-        scenario=ScenarioConfig(
+        scenario=RecommendationScenario(
             scenario_id="three-hour-deadline",
-            lead_time_limit_minutes=45,
+            revised_deadline_at="2026-06-21T09:30:00+08:00",
         ),
         expected_material_ids=("mat-site-a-tiles",),
         expected_excluded_ids=("mat-site-b-tiles", "mat-site-e-tiles", "mat-site-g-wrong-size", "eq-site-h-unavailable"),
@@ -36,9 +35,8 @@ SCENARIO_FIXTURES = {
         expected_equipment_id="eq-site-d-cutter",
     ),
     "site_e_unreadable": ScenarioExpectation(
-        scenario=ScenarioConfig(
+        scenario=RecommendationScenario(
             scenario_id="site-e-unreadable",
-            lead_time_limit_minutes=60,
         ),
         expected_material_ids=("mat-site-a-tiles", "mat-site-b-tiles"),
         expected_excluded_ids=("mat-site-e-tiles", "mat-site-g-wrong-size", "eq-site-h-unavailable"),
@@ -46,9 +44,8 @@ SCENARIO_FIXTURES = {
         expected_equipment_id="eq-site-d-cutter",
     ),
     "no_feasible_reuse": ScenarioExpectation(
-        scenario=ScenarioConfig(
+        scenario=RecommendationScenario(
             scenario_id="no-feasible-reuse",
-            lead_time_limit_minutes=60,
             forbid_material_reuse=True,
         ),
         expected_material_ids=(),
@@ -57,20 +54,18 @@ SCENARIO_FIXTURES = {
         expected_equipment_id="eq-site-d-cutter",
     ),
     "equipment_unavailable": ScenarioExpectation(
-        scenario=ScenarioConfig(
+        scenario=RecommendationScenario(
             scenario_id="equipment-unavailable",
-            lead_time_limit_minutes=60,
             force_equipment_unavailable_ids=("eq-site-d-cutter",),
         ),
         expected_material_ids=("mat-site-a-tiles", "mat-site-b-tiles"),
         expected_excluded_ids=("mat-site-e-tiles", "mat-site-g-wrong-size", "eq-site-d-cutter", "eq-site-h-unavailable"),
         expected_supplier_shortfall_units=70,
-        expected_equipment_id=None,
+        expected_equipment_id="eq-commercial-fallback",
     ),
     "supplier_fallback_exact_total": ScenarioExpectation(
-        scenario=ScenarioConfig(
+        scenario=RecommendationScenario(
             scenario_id="supplier-fallback-exact-total",
-            lead_time_limit_minutes=60,
         ),
         expected_material_ids=("mat-site-a-tiles", "mat-site-b-tiles"),
         expected_excluded_ids=("mat-site-e-tiles", "mat-site-g-wrong-size", "eq-site-h-unavailable"),
