@@ -43,6 +43,44 @@ class ApprovalDecisionType(StrEnum):
     REQUEST_INSPECTION = "request_inspection"
 
 
+class InputSourceType(StrEnum):
+    TYPED_TEXT = "typed_text"
+    IMAGE = "image"
+    HANDWRITTEN_LIST = "handwritten_list"
+    QUOTATION_DOCUMENT = "quotation_document"
+    WHATSAPP_SCREENSHOT = "whatsapp_screenshot"
+    VOICE_NOTE = "voice_note"
+    RESOURCE_PHOTO = "resource_photo"
+
+
+class ConfidenceLabel(StrEnum):
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+
+
+class ConfirmationAction(StrEnum):
+    ACCEPT = "accept"
+    EDIT = "edit"
+    PROVIDE = "provide"
+    REJECT = "reject"
+    RETAKE = "retake"
+    MANUAL_REVIEW = "manual_review"
+
+
+class ConfirmationStatus(StrEnum):
+    PENDING = "pending"
+    CONFIRMED = "confirmed"
+    REJECTED = "rejected"
+    RETAKE_REQUESTED = "retake_requested"
+    MANUAL_REVIEW = "manual_review"
+
+
+class ProviderStatus(StrEnum):
+    SUCCESS = "success"
+    FAILURE = "failure"
+
+
 def _assert_non_negative(name: str, value: float) -> None:
     if value < 0:
         raise ValueError(f"{name} must be non-negative.")
@@ -126,6 +164,14 @@ class MaterialResourcePassport:
     verification_status: VerificationStatus
     inspection_required: bool
     has_required_documentation: bool
+    quantity_estimate_units: int | None = None
+    human_confirmed_quantity_units: int | None = None
+    batch_number: str | None = None
+    purchase_evidence_reference: str | None = None
+    storage_location: str | None = None
+    exposure_information: str | None = None
+    seller_identity: str | None = None
+    status: str = "available"
     evidence_notes: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -169,7 +215,13 @@ class EquipmentResourcePassport:
     operator_required: bool
     risk_category: RiskCategory
     verification_status: VerificationStatus
+    capacity: str | None = None
+    maintenance_date_at: str | None = None
+    maintenance_evidence_reference: str | None = None
+    deposit_requirement_myr: float = 0.0
+    visible_condition: str | None = None
     is_commercial_fallback: bool = False
+    status: str = "available"
     evidence_notes: list[str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
@@ -190,6 +242,8 @@ class EquipmentResourcePassport:
             ("collection_window_end_at", self.collection_window_end_at),
         ):
             _assert_iso_datetime(name, value)
+        if self.maintenance_date_at is not None:
+            _assert_iso_datetime("maintenance_date_at", self.maintenance_date_at)
 
 
 @dataclass(slots=True)
@@ -335,6 +389,139 @@ class EvidenceRecord:
     overrides: list[str]
     expected_impact_summary: str
     actual_outcome_summary: str | None = None
+
+
+@dataclass(slots=True)
+class RawEvidenceReference:
+    reference_id: str
+    source_type: InputSourceType
+    content_reference: str
+    note: str = ""
+
+
+@dataclass(slots=True)
+class AIModelMetadata:
+    provider_name: str
+    model_name: str
+    model_version: str
+    status: ProviderStatus
+    request_id: str
+
+
+@dataclass(slots=True)
+class ProcessingWarning:
+    code: str
+    message: str
+    field_name: str | None = None
+
+
+@dataclass(slots=True)
+class MissingFieldWarning:
+    field_name: str
+    message: str
+    critical: bool
+
+
+@dataclass(slots=True)
+class ExtractedField:
+    field_name: str
+    extracted_value: Any
+    confidence_score: float
+    confidence_label: ConfidenceLabel
+    evidence_reference: RawEvidenceReference | None
+    confirmation_required: bool
+    warning: str | None = None
+    user_confirmed_value: Any = None
+
+    def __post_init__(self) -> None:
+        _assert_confidence(self.confidence_score)
+
+
+@dataclass(slots=True)
+class AIExtractionRequest:
+    request_id: str
+    source_type: InputSourceType
+    content: str
+    content_reference: str
+    input_language: str | None = None
+    reference_datetime: str | None = None
+    timezone: str = MALAYSIA_TIMEZONE
+
+    def __post_init__(self) -> None:
+        if self.reference_datetime is not None:
+            _assert_iso_datetime("reference_datetime", self.reference_datetime)
+
+
+@dataclass(slots=True)
+class StructuredDemandExtractionResult:
+    request_id: str
+    source_type: InputSourceType
+    detected_language: str
+    extracted_fields: list[ExtractedField]
+    missing_fields: list[MissingFieldWarning]
+    warnings: list[ProcessingWarning]
+    model_metadata: AIModelMetadata
+    can_proceed_to_confirmation: bool
+    requires_manual_review: bool
+    normalized_demand: dict[str, Any]
+
+
+@dataclass(slots=True)
+class ResourceScanExtractionResult:
+    request_id: str
+    source_type: InputSourceType
+    resource_kind: ResourceKind
+    detected_language: str
+    extracted_fields: list[ExtractedField]
+    missing_fields: list[MissingFieldWarning]
+    warnings: list[ProcessingWarning]
+    model_metadata: AIModelMetadata
+    can_generate_passport: bool
+    requires_manual_review: bool
+    normalized_resource_data: dict[str, Any]
+
+
+@dataclass(slots=True)
+class ConfirmedFieldValue:
+    field_name: str
+    extracted_value: Any
+    confirmed_value: Any
+    confidence_score: float
+    confidence_label: ConfidenceLabel
+    confirmation_action: ConfirmationAction
+    confirmed_at: str
+
+    def __post_init__(self) -> None:
+        _assert_confidence(self.confidence_score)
+        _assert_iso_datetime("confirmed_at", self.confirmed_at)
+
+
+@dataclass(slots=True)
+class UserConfirmedExtraction:
+    request_id: str
+    status: ConfirmationStatus
+    confirmed_fields: list[ConfirmedFieldValue]
+    warnings: list[ProcessingWarning]
+    confirmed_demand: DemandRequest | None = None
+
+
+@dataclass(slots=True)
+class PassportGenerationResult:
+    request_id: str
+    resource_kind: ResourceKind
+    can_enter_automatic_matching: bool
+    requires_manual_review: bool
+    warnings: list[ProcessingWarning]
+    generated_material_passport: MaterialResourcePassport | None = None
+    generated_equipment_passport: EquipmentResourcePassport | None = None
+
+
+@dataclass(slots=True)
+class AIProviderError:
+    code: str
+    message: str
+    retryable: bool
+    provider_name: str
 
 
 def to_dict(value: Any) -> Any:

@@ -1,6 +1,6 @@
 # LebihSini GreenProof API Contract
 
-All endpoints below are defined as MVP contracts for frontend/backend alignment. They are documented here but not implemented as FastAPI routes in this repository yet.
+All request and response shapes below use canonical `snake_case` and are documented for MVP frontend/backend alignment. FastAPI routes are not implemented in this repository yet.
 
 Units:
 
@@ -18,16 +18,27 @@ Units:
 ```json
 {
   "error": {
-    "code": "DEADLINE_INFEASIBLE",
-    "message": "No prepared reuse source can meet the selected deadline.",
+    "code": "MISSING_CRITICAL_FIELD",
+    "message": "Critical field `deadline_at` is missing and must be confirmed before submission.",
     "details": {}
   }
 }
 ```
 
+Standard codes:
+
+- `INPUT_UNREADABLE`
+- `UNSUPPORTED_INPUT_TYPE`
+- `MISSING_CRITICAL_FIELD`
+- `LOW_CONFIDENCE_CONFIRMATION_REQUIRED`
+- `AI_PROVIDER_UNAVAILABLE`
+- `INVALID_PROVIDER_OUTPUT`
+- `MANUAL_INSPECTION_REQUIRED`
+- `DEADLINE_INFEASIBLE`
+
 ## POST /api/extract-request
 
-Purpose: convert uploaded or raw unstructured input into a structured demand request.
+Purpose: send one raw input through the AI extraction boundary.
 
 Status: future contract only
 
@@ -35,49 +46,61 @@ Request body:
 
 ```json
 {
+  "request_id": "extract-bm-001",
   "source_type": "voice_note",
+  "content": "Esok perlukan 500 tile kelabu 600 kali 600 dan mesin pemotong untuk dua hari.",
+  "content_reference": "demo://voice-note/site-c/request-001",
   "input_language": "ms-MY",
-  "content_reference": "demo://voice-note/site-c/request-001"
+  "reference_datetime": "2026-06-20T09:00:00+08:00",
+  "timezone": "Asia/Kuala_Lumpur"
 }
 ```
 
 Response body:
 
-```json
-{
-  "demand": {
-    "demand_id": "demand-site-c-001",
-    "requesting_site_id": "site-c",
-    "material_category": "porcelain_tile",
-    "product_code": "PG-600-GREY",
-    "colour": "grey",
-    "dimension_mm_width": 600,
-    "dimension_mm_height": 600,
-    "quantity_units": 500,
-    "deadline_at": "2026-06-21T11:00:00+08:00",
-    "equipment_category": "tile_cutter",
-    "equipment_duration_days": 2,
-    "maximum_distance_km": 25.0,
-    "maximum_risk": "amber",
-    "extraction_confidence": 0.91,
-    "input_language": "ms-MY",
-    "source_type": "voice_note",
-    "notes": "Demo demand extracted from a Bahasa voice note."
-  },
-  "warnings": [
-    "The user must confirm extracted fields before final recommendation approval."
-  ]
-}
-```
+Use [examples/bahasa_voice_extraction.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/bahasa_voice_extraction.json) as the canonical example.
 
 Required fields:
 
+- `request_id`
 - `source_type`
-- `content_reference`
+- `detected_language`
+- `extracted_fields`
+- `missing_fields`
+- `warnings`
+- `model_metadata`
+- `can_proceed_to_confirmation`
+- `requires_manual_review`
+- `normalized_demand`
 
-Optional fields:
+## POST /api/extract-request/confirm
 
-- `input_language`
+Purpose: convert a structured extraction into confirmed values after user review.
+
+Status: future contract only
+
+Request body:
+
+```json
+{
+  "request_id": "extract-bm-001",
+  "action": "accept",
+  "confirmed_values": {
+    "product_code": "PG-600-GREY"
+  },
+  "confirmed_at": "2026-06-20T09:05:00+08:00"
+}
+```
+
+Response body:
+
+Use [examples/confirmed_demand.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/confirmed_demand.json) as the canonical example.
+
+Notes:
+
+- confirmed values become the system of record
+- raw provider values must not go directly into the optimiser
+- missing critical fields must block confirmed demand creation
 
 ## POST /api/recommendations
 
@@ -90,7 +113,7 @@ Request body:
 ```json
 {
   "demand": {
-    "demand_id": "demand-site-c-001",
+    "demand_id": "demand-confirmed-extract-bm-001",
     "requesting_site_id": "site-c",
     "material_category": "porcelain_tile",
     "product_code": "PG-600-GREY",
@@ -103,39 +126,21 @@ Request body:
     "equipment_duration_days": 2,
     "maximum_distance_km": 25.0,
     "maximum_risk": "amber",
-    "extraction_confidence": 0.91,
+    "extraction_confidence": 0.85,
     "input_language": "ms-MY",
     "source_type": "voice_note",
-    "notes": "Demo demand extracted from a Bahasa voice note."
+    "notes": "Confirmed from structured AI extraction."
   }
 }
 ```
 
 Response body:
 
-The canonical shape is the full `RecommendationOutput` contract. Use [examples/recommendation_response_tomorrow.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/recommendation_response_tomorrow.json) as the concrete example payload.
-
-Required fields:
-
-- `recommendation_id`
-- `verdict`
-- `deadline_met`
-- `selected_material_resources`
-- `selected_equipment`
-- `excluded_resources`
-- `supplier_shortfall_units`
-- `quantity_fulfilled_units`
-- `cost_breakdown`
-- `carbon_breakdown`
-- `conditions`
-- `reasons`
-- `assumptions`
-- `confidence`
-- `calculation_version`
+Use [examples/recommendation_response_tomorrow.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/recommendation_response_tomorrow.json) as the canonical example.
 
 ## POST /api/recommendations/recalculate
 
-Purpose: recalculate a recommendation after urgency or deadline changes.
+Purpose: recalculate a recommendation after a deadline change.
 
 Status: future contract only
 
@@ -150,16 +155,11 @@ Request body:
 
 Response body:
 
-The canonical shape is the same full `RecommendationOutput` contract. Use [examples/recommendation_response_three_hours.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/recommendation_response_three_hours.json) as the concrete example payload.
+Use [examples/recommendation_response_three_hours.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/recommendation_response_three_hours.json) as the canonical example.
 
-Notes:
+## POST /api/resources/material-passports
 
-- urgency is represented by the revised exact deadline, not by the old ambiguous `lead_time_limit_minutes`
-- the three-hour example is now generated by the real deterministic optimiser, not by the scaffold
-
-## POST /api/recommendations/{id}/decision
-
-Purpose: capture approval, modification, rejection, or inspection requests for a recommendation.
+Purpose: convert a resource-photo extraction into a provisional or confirmed material passport.
 
 Status: future contract only
 
@@ -167,23 +167,25 @@ Request body:
 
 ```json
 {
-  "decision_id": "decision-001",
-  "recommendation_id": "rec-tomorrow-deadline",
-  "decision_type": "approve",
-  "decided_by": "demo.user@lebihsini.test",
-  "decided_at": "2026-06-20T12:05:00+08:00",
-  "override_notes": "Approved after confirming Site B inspection condition."
+  "request_id": "resource-site-a-001",
+  "source_type": "resource_photo",
+  "content_reference": "demo://resource/site-a-photo-001"
 }
 ```
 
 Response body:
 
-```json
-{
-  "status": "recorded",
-  "decision_id": "decision-001"
-}
-```
+Use [examples/site_a_material_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_a_material_passport.json) as the standard successful example and [examples/site_e_provisional_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_e_provisional_passport.json) as the manual-review example.
+
+## POST /api/resources/equipment-passports
+
+Purpose: convert a resource-photo extraction into a provisional equipment passport.
+
+Status: future contract only
+
+Response body:
+
+Use [examples/site_d_equipment_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_d_equipment_passport.json) as the canonical example.
 
 ## GET /api/resources
 
@@ -191,41 +193,13 @@ Purpose: list prepared material and equipment resources for the current cluster.
 
 Status: future contract only
 
-Response body:
-
-```json
-{
-  "items": [
-    {
-      "resource_id": "mat-site-a-tiles",
-      "site_id": "site-a",
-      "site_name": "Site A - Puchong Utama",
-      "category": "porcelain_tile",
-      "quantity_units": 300,
-      "risk_category": "green",
-      "verification_status": "verified"
-    },
-    {
-      "resource_id": "eq-commercial-fallback",
-      "site_id": "commercial-rental",
-      "site_name": "Commercial Equipment Rental",
-      "category": "tile_cutter",
-      "is_commercial_fallback": true,
-      "verification_status": "verified"
-    }
-  ]
-}
-```
-
 ## GET /api/resources/{id}
 
-Purpose: retrieve a full material or equipment passport.
+Purpose: retrieve one stored material or equipment passport.
 
 Status: future contract only
 
-Response body example:
-
-Use [examples/equipment_resource_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/equipment_resource_passport.json) or [examples/material_resource_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/material_resource_passport.json) as the concrete example payloads.
+Use [examples/material_resource_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/material_resource_passport.json) and [examples/equipment_resource_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/equipment_resource_passport.json) as canonical examples.
 
 ## GET /api/evidence-records/{id}
 
@@ -233,9 +207,7 @@ Purpose: return the stored evidence record after human action.
 
 Status: future contract only
 
-Response body:
-
-Use [examples/evidence_record.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/evidence_record.json) as the concrete example payload.
+Use [examples/evidence_record.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/evidence_record.json) as the canonical example.
 
 ## GET /api/health
 
@@ -250,3 +222,10 @@ Response body:
   "status": "ok"
 }
 ```
+
+## AI Provider Notes
+
+- The application depends on a provider interface, not a Grafilab-specific response shape.
+- Official Grafilab endpoint and credential details were not present in this repository.
+- The current implementation therefore uses a deterministic mock provider for offline tests and demos.
+- Production Grafilab integration remains scaffolded only.

@@ -1,0 +1,6 @@
+{
+  "code": "AI_PROVIDER_UNAVAILABLE",
+  "message": "Mocked provider outage for contract example.",
+  "provider_name": "mock_grafilab",
+  "retryable": true
+}

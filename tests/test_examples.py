@@ -13,8 +13,17 @@ class ExampleFileTests(unittest.TestCase):
         expected = build_example_payloads()
         file_map = {
             "demand_request": "demand_request.json",
+            "bahasa_voice_extraction": "bahasa_voice_extraction.json",
+            "image_extraction": "image_extraction.json",
+            "extraction_requires_correction": "extraction_requires_correction.json",
+            "confirmed_demand": "confirmed_demand.json",
             "material_resource_passport": "material_resource_passport.json",
             "equipment_resource_passport": "equipment_resource_passport.json",
+            "site_a_material_passport": "site_a_material_passport.json",
+            "site_e_provisional_passport": "site_e_provisional_passport.json",
+            "site_d_equipment_passport": "site_d_equipment_passport.json",
+            "grafilab_provider_error": "grafilab_provider_error.json",
+            "low_confidence_response": "low_confidence_response.json",
             "recommendation_response_tomorrow": "recommendation_response_tomorrow.json",
             "recommendation_response_three_hours": "recommendation_response_three_hours.json",
             "evidence_record": "evidence_record.json",
