@@ -5,21 +5,21 @@ from lebihsini_greenproof.contracts import (
     EvidenceRecord,
     HumanApprovalDecision,
 )
+from lebihsini_greenproof.composer import generate_recommendation
 from lebihsini_greenproof.demo_data import load_demo_dataset
-from lebihsini_greenproof.foundation import build_reference_recommendation
 from lebihsini_greenproof.scenarios import SCENARIO_FIXTURES
 from lebihsini_greenproof.serialization import to_jsonable
 
 
 def build_example_payloads() -> dict[str, object]:
     dataset = load_demo_dataset()
-    tomorrow = build_reference_recommendation(
+    tomorrow = generate_recommendation(
         dataset,
-        SCENARIO_FIXTURES["tomorrow_deadline"].scenario,
+        scenario=SCENARIO_FIXTURES["tomorrow_deadline"].scenario,
     )
-    three_hours = build_reference_recommendation(
+    three_hours = generate_recommendation(
         dataset,
-        SCENARIO_FIXTURES["three_hour_deadline"].scenario,
+        scenario=SCENARIO_FIXTURES["three_hour_deadline"].scenario,
     )
     decision = HumanApprovalDecision(
         decision_id="decision-001",
@@ -34,7 +34,9 @@ def build_example_payloads() -> dict[str, object]:
         demand=dataset.demand,
         recommendation=tomorrow,
         original_request_reference="demo://voice-note/site-c/request-001",
-        resources_considered=[item.resource_id for item in dataset.material_resources] + [item.resource_id for item in dataset.equipment_resources],
+        resources_considered=[item.resource_id for item in dataset.material_resources]
+        + [item.resource_id for item in dataset.equipment_resources]
+        + [dataset.commercial_equipment_fallback.resource_id],
         human_decision=decision,
         overrides=[],
         expected_impact_summary="Reuse 430 tiles, purchase 70 new tiles, and use the nearby idle cutter while keeping the deadline feasible.",

@@ -8,8 +8,8 @@ from lebihsini_greenproof.contracts import (
     EvidenceRecord,
     HumanApprovalDecision,
 )
+from lebihsini_greenproof.composer import generate_recommendation
 from lebihsini_greenproof.demo_data import load_demo_dataset
-from lebihsini_greenproof.foundation import build_reference_recommendation
 from lebihsini_greenproof.scenarios import SCENARIO_FIXTURES
 from lebihsini_greenproof.serialization import to_json_text, to_jsonable
 
@@ -17,9 +17,9 @@ from lebihsini_greenproof.serialization import to_json_text, to_jsonable
 class SerializationTests(unittest.TestCase):
     def setUp(self) -> None:
         self.dataset = load_demo_dataset()
-        self.recommendation = build_reference_recommendation(
+        self.recommendation = generate_recommendation(
             self.dataset,
-            SCENARIO_FIXTURES["tomorrow_deadline"].scenario,
+            scenario=SCENARIO_FIXTURES["tomorrow_deadline"].scenario,
         )
 
     def test_demand_request_serializes(self) -> None:

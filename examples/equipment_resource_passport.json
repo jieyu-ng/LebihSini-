@@ -11,6 +11,7 @@
     "Maintenance record present.",
     "Available for three days."
   ],
+  "is_commercial_fallback": false,
   "maintenance_confidence": 0.92,
   "maintenance_record_present": true,
   "operator_required": false,
