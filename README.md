@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # LebihSini GreenProof
 
 LebihSini GreenProof is a reuse-first procurement intelligence MVP for Malaysian construction SMEs. Before a contractor buys new materials or rents equipment, the system checks nearby verified surplus and idle resources, compares a reuse-first plan against normal procurement, and keeps the human decision-maker in control.
@@ -94,3 +95,6 @@ Build the backend integration layer around the current optimiser:
 - FastAPI endpoints against the existing contracts
 
 Keep the existing JSON contracts stable while exposing the real engine through the future recommendation API.
+=======
+# LebihSini-
+>>>>>>> origin/main
