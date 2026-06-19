@@ -1,0 +1,113 @@
+{
+  "confirmed_demand": {
+    "colour": "grey",
+    "deadline_at": "2026-06-21T11:00:00+08:00",
+    "demand_id": "demand-confirmed-extract-bm-001",
+    "dimension_mm_height": 600,
+    "dimension_mm_width": 600,
+    "equipment_category": "tile_cutter",
+    "equipment_duration_days": 2,
+    "extraction_confidence": 0.87,
+    "input_language": "ms-MY",
+    "material_category": "porcelain_tile",
+    "maximum_distance_km": 25.0,
+    "maximum_risk": "amber",
+    "notes": "Confirmed from structured AI extraction.",
+    "product_code": "PG-600-GREY",
+    "quantity_units": 500,
+    "requesting_site_id": "site-c",
+    "source_type": "voice_note"
+  },
+  "confirmed_fields": [
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.92,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": "porcelain_tile",
+      "extracted_value": "porcelain_tile",
+      "field_name": "material_category"
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.68,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": "PG-600-GREY",
+      "extracted_value": "PG-600-GREY",
+      "field_name": "product_code"
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.88,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": "grey",
+      "extracted_value": "grey",
+      "field_name": "colour"
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.93,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": 600,
+      "extracted_value": 600,
+      "field_name": "dimension_mm_width"
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.93,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": 600,
+      "extracted_value": 600,
+      "field_name": "dimension_mm_height"
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.9,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": 500,
+      "extracted_value": 500,
+      "field_name": "quantity_units"
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.89,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": "tile_cutter",
+      "extracted_value": "tile_cutter",
+      "field_name": "equipment_category"
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.86,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": 2,
+      "extracted_value": 2,
+      "field_name": "equipment_duration_days"
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.84,
+      "confirmation_action": "accept",
+      "confirmed_at": "2026-06-20T09:05:00+08:00",
+      "confirmed_value": "2026-06-21T11:00:00+08:00",
+      "extracted_value": "2026-06-21T11:00:00+08:00",
+      "field_name": "deadline_at"
+    }
+  ],
+  "request_id": "extract-bm-001",
+  "status": "confirmed",
+  "warnings": [
+    {
+      "code": "LOW_CONFIDENCE_CONFIRMATION_REQUIRED",
+      "field_name": null,
+      "message": "One or more extracted fields require careful confirmation before submission."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+Return JSON only.
+Draft concise plain-language explanation snippets.
+Rules:
+- do not certify safety
+- do not perform arithmetic
+- refer only to provided deterministic recommendation data
