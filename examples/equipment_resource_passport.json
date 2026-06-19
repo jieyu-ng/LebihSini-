@@ -1,0 +1,27 @@
+{
+  "availability_end_at": "2026-06-23T18:00:00+08:00",
+  "availability_start_at": "2026-06-20T08:00:00+08:00",
+  "brand_model": "Hilti DC-600 Demo",
+  "category": "tile_cutter",
+  "collection_window_end_at": "2026-06-21T09:00:00+08:00",
+  "collection_window_start_at": "2026-06-21T08:00:00+08:00",
+  "commercial_rental_rate_myr_per_day": 120.0,
+  "distance_to_site_km": 9.0,
+  "evidence_notes": [
+    "Maintenance record present.",
+    "Available for three days."
+  ],
+  "maintenance_confidence": 0.92,
+  "maintenance_record_present": true,
+  "operator_required": false,
+  "owner": "Site D",
+  "rental_rate_myr_per_day": 60.0,
+  "resource_id": "eq-site-d-cutter",
+  "risk_category": "green",
+  "site_id": "site-d",
+  "site_name": "Site D - Subang Jaya",
+  "transport_rate_myr_per_km": 4.0,
+  "travel_time_to_site_minutes": 30,
+  "vehicle_factor_kgco2e_per_km": 0.27,
+  "verification_status": "verified"
+}

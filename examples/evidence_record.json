@@ -1,0 +1,162 @@
+{
+  "actual_outcome_summary": null,
+  "demand": {
+    "colour": "grey",
+    "deadline_at": "2026-06-21T11:00:00+08:00",
+    "demand_id": "demand-site-c-001",
+    "dimension_mm_height": 600,
+    "dimension_mm_width": 600,
+    "equipment_category": "tile_cutter",
+    "equipment_duration_days": 2,
+    "extraction_confidence": 0.91,
+    "input_language": "ms-MY",
+    "material_category": "porcelain_tile",
+    "maximum_distance_km": 25.0,
+    "maximum_risk": "amber",
+    "notes": "Demo demand extracted from a Bahasa voice note.",
+    "product_code": "PG-600-GREY",
+    "quantity_units": 500,
+    "requesting_site_id": "site-c",
+    "source_type": "voice_note"
+  },
+  "expected_impact_summary": "Reuse 430 tiles, purchase 70 new tiles, and use the nearby idle cutter while keeping the deadline feasible.",
+  "human_decision": {
+    "decided_at": "2026-06-20T12:05:00+08:00",
+    "decided_by": "demo.user@lebihsini.test",
+    "decision_id": "decision-001",
+    "decision_type": "approve",
+    "override_notes": "Approved after confirming Site B inspection condition.",
+    "recommendation_id": "rec-tomorrow-deadline"
+  },
+  "original_request_reference": "demo://voice-note/site-c/request-001",
+  "overrides": [],
+  "recommendation": {
+    "assumptions": [
+      "Estimated using stated cost and carbon assumptions.",
+      "This reference flow is a foundation validator, not the final optimiser."
+    ],
+    "calculation_version": "foundation-v0.1",
+    "carbon_breakdown": {
+      "assumptions": [
+        "Transport carbon is estimated from distance x vehicle factor x trip count.",
+        "All carbon values are estimates using fictional demo assumptions."
+      ],
+      "baseline_carbon_kgco2e": 912.86,
+      "greenproof_carbon_kgco2e": 146.12,
+      "material_carbon_factor_kgco2e_per_unit": 1.8,
+      "net_carbon_avoided_kgco2e": 766.74,
+      "number_of_trips": 2,
+      "processing_carbon_kgco2e": 5.0,
+      "quantity_units": 500,
+      "transport_distance_km": 28.0,
+      "unit": "kgCO2e",
+      "vehicle_factor_kgco2e_per_km": 0.27
+    },
+    "conditions": [
+      "Manual inspection required before this resource can be approved.",
+      "Supplier fallback added to fulfil the remaining quantity."
+    ],
+    "confidence": 0.89,
+    "cost_breakdown": {
+      "additional_handling_cost_myr": 30.0,
+      "assumptions": [
+        "Transfer payments are treated as redistribution of existing value, not new system-wide value.",
+        "All values are deterministic demo estimates in Malaysian ringgit."
+      ],
+      "commercial_equipment_rental_myr": 240.0,
+      "currency": "MYR",
+      "disposal_or_storage_cost_myr": 20.0,
+      "equipment_cost_myr": 120.0,
+      "expected_delay_cost_myr": 0.0,
+      "greenproof_total_myr": 1974.0,
+      "gross_saving_myr": 748.0,
+      "inspection_cost_myr": 25.0,
+      "net_saving_myr": 676.0,
+      "new_material_cost_myr": 2300.0,
+      "new_material_shortfall_cost_myr": 322.0,
+      "normal_procurement_baseline_myr": 2650.0,
+      "platform_fee_myr": 15.0,
+      "reuse_transfer_cost_myr": 1350.0,
+      "reuse_transport_cost_myr": 112.0,
+      "supplier_delivery_cost_myr": 90.0,
+      "working_capital_protected_myr": 676.0
+    },
+    "deadline_met": true,
+    "excluded_resources": [
+      {
+        "confidence": 0.41,
+        "reason_code": "material_ineligible",
+        "reason_text": "Product specification is incompatible with the request. Risk exceeds the allowed tolerance. Excluded from automatic recommendation because required documentation was absent. Excluded from automatic recommendation because the product label was unreadable and the condition could not be sufficiently verified.",
+        "resource_id": "mat-site-e-tiles",
+        "site_id": "site-e",
+        "site_name": "Site E - Kinrara"
+      },
+      {
+        "confidence": 0.95,
+        "reason_code": "material_ineligible",
+        "reason_text": "Product specification is incompatible with the request. Dimensions do not match the request. Reuse was not recommended because the delivery deadline could not be met.",
+        "resource_id": "mat-site-g-wrong-size",
+        "site_id": "site-g",
+        "site_name": "Site G - Shah Alam"
+      },
+      {
+        "confidence": 0.9,
+        "reason_code": "equipment_ineligible",
+        "reason_text": "Reuse was not recommended because the delivery deadline could not be met.",
+        "resource_id": "eq-site-h-unavailable",
+        "site_id": "site-h",
+        "site_name": "Site H - Klang"
+      }
+    ],
+    "quantity_fulfilled_units": 500,
+    "reasons": [
+      "Partial reuse recommended because it reduced new purchasing while keeping the plan feasible.",
+      "Supplier fallback added to fulfil the remaining quantity."
+    ],
+    "recommendation_id": "rec-tomorrow-deadline",
+    "selected_equipment": {
+      "category": "tile_cutter",
+      "conditions": [],
+      "duration_days": 2,
+      "rental_cost_myr": 120.0,
+      "resource_id": "eq-site-d-cutter",
+      "site_id": "site-d",
+      "site_name": "Site D - Subang Jaya"
+    },
+    "selected_material_resources": [
+      {
+        "conditions": [],
+        "distance_km": 11.0,
+        "inspection_required": false,
+        "quantity_units": 300,
+        "resource_id": "mat-site-a-tiles",
+        "site_id": "site-a",
+        "site_name": "Site A - Puchong Utama",
+        "transfer_price_myr_per_unit": 3.2
+      },
+      {
+        "conditions": [
+          "Manual inspection required before this resource can be approved."
+        ],
+        "distance_km": 17.0,
+        "inspection_required": true,
+        "quantity_units": 130,
+        "resource_id": "mat-site-b-tiles",
+        "site_id": "site-b",
+        "site_name": "Site B - Bandar Puteri",
+        "transfer_price_myr_per_unit": 3.0
+      }
+    ],
+    "supplier_shortfall_units": 70,
+    "verdict": "partial_reuse_recommended"
+  },
+  "record_id": "evidence-001",
+  "resources_considered": [
+    "mat-site-a-tiles",
+    "mat-site-b-tiles",
+    "mat-site-e-tiles",
+    "mat-site-g-wrong-size",
+    "eq-site-d-cutter",
+    "eq-site-h-unavailable"
+  ]
+}

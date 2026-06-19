@@ -1,0 +1,15 @@
+EXPLANATION_TEXT = {
+    "resource_selected": "Selected because it matches the requested specification and remains feasible within the stated deadline.",
+    "resource_excluded_unverified_spec": "Excluded from automatic recommendation because the product specification could not be verified.",
+    "inspection_required": "Manual inspection required before this resource can be approved.",
+    "deadline_infeasible": "Reuse was not recommended because the delivery deadline could not be met.",
+    "documentation_missing": "Excluded from automatic recommendation because required documentation was absent.",
+    "supplier_fallback_required": "Supplier fallback added to fulfil the remaining quantity.",
+    "negative_net_carbon_benefit": "Reuse was not recommended because the estimated transport impact outweighed the avoided material carbon.",
+    "partial_reuse_recommended": "Partial reuse recommended because it reduced new purchasing while keeping the plan feasible.",
+    "normal_procurement_recommended": "Normal procurement recommended because reuse did not satisfy the current operational constraints.",
+    "low_confidence_ai_extraction": "Human confirmation required because one or more extracted fields had limited confidence.",
+    "human_confirmation_required": "The user must confirm extracted fields before final recommendation approval.",
+    "estimated_assumptions": "Estimated using stated cost and carbon assumptions.",
+    "site_e_uncertainty": "Excluded from automatic recommendation because the product label was unreadable and the condition could not be sufficiently verified.",
+}

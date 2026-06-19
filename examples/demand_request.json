@@ -1,0 +1,19 @@
+{
+  "colour": "grey",
+  "deadline_at": "2026-06-21T11:00:00+08:00",
+  "demand_id": "demand-site-c-001",
+  "dimension_mm_height": 600,
+  "dimension_mm_width": 600,
+  "equipment_category": "tile_cutter",
+  "equipment_duration_days": 2,
+  "extraction_confidence": 0.91,
+  "input_language": "ms-MY",
+  "material_category": "porcelain_tile",
+  "maximum_distance_km": 25.0,
+  "maximum_risk": "amber",
+  "notes": "Demo demand extracted from a Bahasa voice note.",
+  "product_code": "PG-600-GREY",
+  "quantity_units": 500,
+  "requesting_site_id": "site-c",
+  "source_type": "voice_note"
+}
