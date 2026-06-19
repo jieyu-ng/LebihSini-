@@ -1,0 +1,8 @@
+Return JSON only.
+Extract a provisional equipment Passport from the visible evidence.
+Rules:
+- do not certify maintenance or safety
+- do not invent maintenance dates
+- return null when evidence is absent
+- provide field-level confidence
+- identify missing maintenance evidence

@@ -1,0 +1,2 @@
+Return JSON only.
+List missing critical fields and short warnings for the extraction result.
