@@ -5,141 +5,180 @@ import { useState } from "react";
 
 export default function VerdictPage() {
   const router = useRouter();
+  const [approving, setApproving] = useState(false);
 
-  // ✅ Fix hydration issue: freeze timestamp once
-  const [timestamp] = useState(() => new Date().toISOString());
+  const verdict = {
+    recommendedPlan: "GreenProof Hybrid Reuse Plan",
 
-  const evidence = {
-    request: "500 porcelain tiles + tile cutter needed by tomorrow",
-
-    selectedResources: [
-      "Site A - 300 tiles",
-      "Site B - 130 tiles (inspection required)",
-      "Supplier F - 70 tiles (new supply)",
-      "Site D - tile cutter",
+    reasons: [
+      "Sufficient reuse material available from Site A & B",
+      "Equipment already available at Site D (no rental needed)",
+      "Supplier F fills material shortfall efficiently",
+      "Optimised transport distance across sites",
     ],
 
-    excludedResources: [
-      "Site E - uncertain condition (unreadable label)",
+    conditions: [
+      "Site B tiles require inspection before final approval",
+      "Delivery must be completed before 11:00 tomorrow",
     ],
 
-    cost: {
-      baseline: 12500,
-      greenproof: 9100,
-      savings: 3400,
-    },
+    excludedResources: ["Site E – Unverified condition (High risk)"],
 
-    carbon: {
-      baseline: 1600,
-      greenproof: 720,
-      saved: 880,
+    confidenceBreakdown: {
+      materialMatch: 0.94,
+      availability: 0.88,
+      riskAssessment: 0.79,
+      deadlineFeasibility: 0.85,
     },
-
-    decision: "Approved - Partial Reuse Plan",
-    timestamp,
   };
+
+  function approve() {
+    setApproving(true);
+
+    setTimeout(() => {
+      localStorage.setItem("decision", "approved");
+      localStorage.setItem("selectedPlan", "greenproof");
+
+      router.push("/evidence");
+    }, 1200);
+  }
+
+  function modify() {
+    localStorage.setItem("returningFrom", "verdict");
+    router.push("/plans");
+  }
+
+  function normalPurchase() {
+    localStorage.setItem("mode", "normal");
+    router.push("/resources");
+  }
+
+  function requestInspection() {
+    localStorage.setItem("inspectionMode", "true");
+    router.push("/resources");
+  }
+
+  function reject() {
+    localStorage.clear();
+    router.push("/");
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
 
         {/* HEADER */}
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold">Evidence Record</h1>
+        <div>
+          <h1 className="text-2xl font-semibold">Verdict</h1>
           <p className="text-sm text-gray-500">
-            Immutable audit trail of GreenProof decision
+            AI-generated procurement decision summary
           </p>
         </div>
 
-        {/* REQUEST */}
+        {/* RECOMMENDED PLAN */}
         <div className="bg-white border rounded-xl p-5">
-          <h2 className="font-medium mb-2">Original Request</h2>
-          <p className="text-sm text-gray-600">{evidence.request}</p>
+          <h2 className="font-medium mb-2">Recommended Plan</h2>
+          <p className="text-green-700 font-semibold">
+            {verdict.recommendedPlan}
+          </p>
         </div>
 
-        {/* DECISION */}
+        {/* REASONS */}
         <div className="bg-white border rounded-xl p-5">
-          <h2 className="font-medium mb-2">Final Decision</h2>
-
-          <div className="text-green-600 font-semibold">
-            {evidence.decision}
-          </div>
-
-          <div className="text-xs text-gray-500 mt-2">
-            Timestamp: {evidence.timestamp}
-          </div>
+          <h2 className="font-medium mb-3">Reasons</h2>
+          <ul className="space-y-2 text-sm">
+            {verdict.reasons.map((r, i) => (
+              <li key={i} className="text-gray-700 flex gap-2">
+                <span className="text-blue-600">•</span>
+                {r}
+              </li>
+            ))}
+          </ul>
         </div>
 
-        {/* RESOURCES */}
-        <div className="grid gap-4">
-
-          {/* SELECTED */}
-          <div className="bg-white border rounded-xl p-5">
-            <h3 className="font-medium mb-3">Selected Resources</h3>
-
-            <ul className="space-y-2 text-sm">
-              {evidence.selectedResources.map((item, i) => (
-                <li key={i} className="flex gap-2 text-gray-700">
-                  <span className="text-green-600">✔</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* EXCLUDED */}
-          <div className="bg-white border rounded-xl p-5">
-            <h3 className="font-medium mb-3">Excluded Resources</h3>
-
-            <ul className="space-y-2 text-sm">
-              {evidence.excludedResources.map((item, i) => (
-                <li key={i} className="flex gap-2 text-gray-500">
-                  <span className="text-red-500">✖</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* IMPACT */}
+        {/* CONDITIONS */}
         <div className="bg-white border rounded-xl p-5">
-          <h3 className="font-medium mb-3">Impact Summary</h3>
+          <h2 className="font-medium mb-3">Conditions</h2>
+          <ul className="space-y-2 text-sm">
+            {verdict.conditions.map((c, i) => (
+              <li key={i} className="text-yellow-700 flex gap-2">
+                <span>⚠</span>
+                {c}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
+        {/* EXCLUDED */}
+        <div className="bg-white border rounded-xl p-5">
+          <h2 className="font-medium mb-3">Excluded Resources</h2>
+          <ul className="space-y-2 text-sm">
+            {verdict.excludedResources.map((e, i) => (
+              <li key={i} className="text-red-600 flex gap-2">
+                <span>✖</span>
+                {e}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            {/* COST */}
-            <div className="p-3 border rounded-lg">
-              <div className="text-gray-500">Cost Savings</div>
-              <div className="text-lg font-semibold text-green-600">
-                RM {evidence.cost.savings}
-              </div>
-              <div className="text-xs text-gray-500">
-                {evidence.cost.greenproof} vs {evidence.cost.baseline}
-              </div>
-            </div>
+        {/* CONFIDENCE */}
+        <div className="bg-white border rounded-xl p-5">
+          <h2 className="font-medium mb-3">Confidence</h2>
 
-            {/* CARBON */}
-            <div className="p-3 border rounded-lg">
-              <div className="text-gray-500">Carbon Reduction</div>
-              <div className="text-lg font-semibold text-green-600">
-                {evidence.carbon.saved} kg CO₂e
-              </div>
-              <div className="text-xs text-gray-500">
-                {evidence.carbon.greenproof} vs {evidence.carbon.baseline}
-              </div>
-            </div>
-
+          <div className="text-sm space-y-1 text-gray-700">
+            <div>Material Match: {verdict.confidenceBreakdown.materialMatch}</div>
+            <div>Availability: {verdict.confidenceBreakdown.availability}</div>
+            <div>Risk Assessment: {verdict.confidenceBreakdown.riskAssessment}</div>
+            <div>Deadline Feasibility: {verdict.confidenceBreakdown.deadlineFeasibility}</div>
           </div>
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={() => router.push("/evidence")}
-          className="w-full bg-black text-white py-3 rounded-xl font-medium hover:bg-gray-800"
-        >
-          New Request
-        </button>
+        {/* ACTIONS */}
+        <div className="grid gap-3">
+
+          <button
+            onClick={approve}
+            className="w-full bg-green-600 text-white py-3 rounded-xl"
+          >
+            {approving ? "Generating Audit Log..." : "Approve"}
+          </button>
+
+          <button
+            onClick={modify}
+            className="w-full bg-blue-600 text-white py-3 rounded-xl"
+          >
+            Modify Plan
+          </button>
+
+          <button
+            onClick={normalPurchase}
+            className="w-full bg-black text-white py-3 rounded-xl"
+          >
+            Proceed with Normal Purchase
+          </button>
+
+          <button
+            onClick={requestInspection}
+            className="w-full bg-yellow-600 text-white py-3 rounded-xl"
+          >
+            Request Inspection
+          </button>
+
+          <button
+            onClick={reject}
+            className="w-full bg-red-600 text-white py-3 rounded-xl"
+          >
+            Reject
+          </button>
+
+          <button
+            onClick={() => router.push("/evidence")}
+            className="w-full border py-3 rounded-xl"
+          >
+            View Evidence Record
+          </button>
+        </div>
 
       </div>
     </div>
