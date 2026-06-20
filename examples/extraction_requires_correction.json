@@ -1,0 +1,197 @@
+{
+  "can_proceed_to_confirmation": false,
+  "detected_language": "en-MY",
+  "extracted_fields": [
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.78,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:material_category",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": "porcelain_tile",
+      "field_name": "material_category",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "low",
+      "confidence_score": 0.2,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:product_code",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": null,
+      "field_name": "product_code",
+      "user_confirmed_value": null,
+      "warning": "Product code could not be verified from the visible evidence."
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.72,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:colour",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": "grey",
+      "field_name": "colour",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.79,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:dimension_mm_width",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": 600,
+      "field_name": "dimension_mm_width",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.79,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:dimension_mm_height",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": 600,
+      "field_name": "dimension_mm_height",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.7,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:quantity_units",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": 500,
+      "field_name": "quantity_units",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.77,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:equipment_category",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": "tile_cutter",
+      "field_name": "equipment_category",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.69,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:equipment_duration_days",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": 2,
+      "field_name": "equipment_duration_days",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "low",
+      "confidence_score": 0.1,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://handwritten/request-001",
+        "note": "Derived from handwritten_list.",
+        "reference_id": "extract-handwritten-001:deadline_at",
+        "source_type": "handwritten_list"
+      },
+      "extracted_value": null,
+      "field_name": "deadline_at",
+      "user_confirmed_value": null,
+      "warning": null
+    }
+  ],
+  "missing_fields": [
+    {
+      "critical": true,
+      "field_name": "deadline_at",
+      "message": "Critical field `deadline_at` is missing and must be confirmed before submission."
+    },
+    {
+      "critical": true,
+      "field_name": "product_code",
+      "message": "Critical field `product_code` is missing and must be confirmed before submission."
+    }
+  ],
+  "model_metadata": {
+    "model_name": "mock-demand-extractor",
+    "model_version": "v1",
+    "operation_type": "fixture_structured_extraction",
+    "provider_name": "mock_grafilab",
+    "request_id": "extract-handwritten-001",
+    "status": "success"
+  },
+  "normalized_demand": {
+    "colour": "grey",
+    "deadline_at": null,
+    "dimension_mm_height": 600,
+    "dimension_mm_width": 600,
+    "equipment_category": "tile_cutter",
+    "equipment_duration_days": 2,
+    "material_category": "porcelain_tile",
+    "product_code": null,
+    "quantity_units": 500
+  },
+  "request_id": "extract-handwritten-001",
+  "requires_manual_review": true,
+  "source_type": "handwritten_list",
+  "warnings": [
+    {
+      "code": "LOW_CONFIDENCE_CONFIRMATION_REQUIRED",
+      "field_name": null,
+      "message": "One or more extracted fields require careful confirmation before submission."
+    },
+    {
+      "code": "LOW_CONFIDENCE_CONFIRMATION_REQUIRED",
+      "field_name": null,
+      "message": "Low-confidence critical fields must be confirmed or corrected before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "deadline_at",
+      "message": "Critical field `deadline_at` is missing and must be confirmed before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "product_code",
+      "message": "Critical field `product_code` is missing and must be confirmed before submission."
+    }
+  ]
+}

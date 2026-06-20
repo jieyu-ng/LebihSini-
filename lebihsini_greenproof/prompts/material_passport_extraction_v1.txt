@@ -1,0 +1,9 @@
+Return JSON only.
+Extract a provisional material Resource Passport from the visible evidence.
+Rules:
+- do not certify safety
+- do not invent unreadable product labels
+- return null when evidence is absent
+- provide field-level confidence
+- identify photo evidence and missing critical fields
+- use English enum values in structured output

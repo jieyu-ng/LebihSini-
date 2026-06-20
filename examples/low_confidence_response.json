@@ -1,0 +1,152 @@
+{
+  "can_proceed_to_confirmation": false,
+  "detected_language": "unknown",
+  "extracted_fields": [
+    {
+      "confidence_label": "low",
+      "confidence_score": 0.1,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://low-confidence/request-001",
+        "note": "Derived from image.",
+        "reference_id": "extract-low-001:material_category",
+        "source_type": "image"
+      },
+      "extracted_value": null,
+      "field_name": "material_category",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "low",
+      "confidence_score": 0.1,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://low-confidence/request-001",
+        "note": "Derived from image.",
+        "reference_id": "extract-low-001:quantity_units",
+        "source_type": "image"
+      },
+      "extracted_value": null,
+      "field_name": "quantity_units",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "low",
+      "confidence_score": 0.1,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://low-confidence/request-001",
+        "note": "Derived from image.",
+        "reference_id": "extract-low-001:deadline_at",
+        "source_type": "image"
+      },
+      "extracted_value": null,
+      "field_name": "deadline_at",
+      "user_confirmed_value": null,
+      "warning": null
+    }
+  ],
+  "missing_fields": [
+    {
+      "critical": true,
+      "field_name": "deadline_at",
+      "message": "Critical field `deadline_at` is missing and must be confirmed before submission."
+    },
+    {
+      "critical": true,
+      "field_name": "dimension_mm_height",
+      "message": "Critical field `dimension_mm_height` is missing and must be confirmed before submission."
+    },
+    {
+      "critical": true,
+      "field_name": "dimension_mm_width",
+      "message": "Critical field `dimension_mm_width` is missing and must be confirmed before submission."
+    },
+    {
+      "critical": true,
+      "field_name": "equipment_category",
+      "message": "Critical field `equipment_category` is missing and must be confirmed before submission."
+    },
+    {
+      "critical": true,
+      "field_name": "material_category",
+      "message": "Critical field `material_category` is missing and must be confirmed before submission."
+    },
+    {
+      "critical": true,
+      "field_name": "product_code",
+      "message": "Critical field `product_code` is missing and must be confirmed before submission."
+    },
+    {
+      "critical": true,
+      "field_name": "quantity_units",
+      "message": "Critical field `quantity_units` is missing and must be confirmed before submission."
+    }
+  ],
+  "model_metadata": {
+    "model_name": "mock-demand-extractor",
+    "model_version": "v1",
+    "operation_type": "fixture_structured_extraction",
+    "provider_name": "mock_grafilab",
+    "request_id": "extract-low-001",
+    "status": "success"
+  },
+  "normalized_demand": {
+    "colour": null,
+    "deadline_at": null,
+    "dimension_mm_height": null,
+    "dimension_mm_width": null,
+    "equipment_category": null,
+    "equipment_duration_days": null,
+    "material_category": null,
+    "product_code": null,
+    "quantity_units": null
+  },
+  "request_id": "extract-low-001",
+  "requires_manual_review": true,
+  "source_type": "image",
+  "warnings": [
+    {
+      "code": "LOW_CONFIDENCE_CONFIRMATION_REQUIRED",
+      "field_name": null,
+      "message": "Low-confidence critical fields must be confirmed or corrected before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "deadline_at",
+      "message": "Critical field `deadline_at` is missing and must be confirmed before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "dimension_mm_height",
+      "message": "Critical field `dimension_mm_height` is missing and must be confirmed before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "dimension_mm_width",
+      "message": "Critical field `dimension_mm_width` is missing and must be confirmed before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "equipment_category",
+      "message": "Critical field `equipment_category` is missing and must be confirmed before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "material_category",
+      "message": "Critical field `material_category` is missing and must be confirmed before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "product_code",
+      "message": "Critical field `product_code` is missing and must be confirmed before submission."
+    },
+    {
+      "code": "MISSING_CRITICAL_FIELD",
+      "field_name": "quantity_units",
+      "message": "Critical field `quantity_units` is missing and must be confirmed before submission."
+    }
+  ]
+}

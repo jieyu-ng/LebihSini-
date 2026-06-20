@@ -1,7 +1,18 @@
 """LebihSini GreenProof foundation package."""
 
 __all__ = [
+    "ai_demo_fixtures",
+    "ai_extraction",
+    "ai_provider",
+    "carbon",
+    "confidence",
     "contracts",
+    "explanation",
+    "financial",
+    "grafilab_client",
+    "input_processing",
+    "mock_grafilab_provider",
+    "passport_builder",
     "constraints",
     "composer",
     "demo_data",
@@ -12,5 +23,9 @@ __all__ = [
     "ranking",
     "scenarios",
     "serialization",
+    "structured_output",
     "urgency",
+    "api",
+    "repositories",
+    "services",
 ]

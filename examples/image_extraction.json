@@ -1,0 +1,171 @@
+{
+  "can_proceed_to_confirmation": true,
+  "detected_language": "en-MY",
+  "extracted_fields": [
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.96,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:material_category",
+        "source_type": "typed_text"
+      },
+      "extracted_value": "porcelain_tile",
+      "field_name": "material_category",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "medium",
+      "confidence_score": 0.74,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:product_code",
+        "source_type": "typed_text"
+      },
+      "extracted_value": "PG-600-GREY",
+      "field_name": "product_code",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.95,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:colour",
+        "source_type": "typed_text"
+      },
+      "extracted_value": "grey",
+      "field_name": "colour",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.95,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:dimension_mm_width",
+        "source_type": "typed_text"
+      },
+      "extracted_value": 600,
+      "field_name": "dimension_mm_width",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.95,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:dimension_mm_height",
+        "source_type": "typed_text"
+      },
+      "extracted_value": 600,
+      "field_name": "dimension_mm_height",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.95,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:quantity_units",
+        "source_type": "typed_text"
+      },
+      "extracted_value": 500,
+      "field_name": "quantity_units",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.93,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:equipment_category",
+        "source_type": "typed_text"
+      },
+      "extracted_value": "tile_cutter",
+      "field_name": "equipment_category",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.92,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:equipment_duration_days",
+        "source_type": "typed_text"
+      },
+      "extracted_value": 2,
+      "field_name": "equipment_duration_days",
+      "user_confirmed_value": null,
+      "warning": null
+    },
+    {
+      "confidence_label": "high",
+      "confidence_score": 0.9,
+      "confirmation_required": true,
+      "evidence_reference": {
+        "content_reference": "demo://typed/en/request-001",
+        "note": "Derived from typed_text.",
+        "reference_id": "extract-en-001:deadline_at",
+        "source_type": "typed_text"
+      },
+      "extracted_value": "2026-06-21T11:00:00+08:00",
+      "field_name": "deadline_at",
+      "user_confirmed_value": null,
+      "warning": null
+    }
+  ],
+  "missing_fields": [],
+  "model_metadata": {
+    "model_name": "mock-demand-extractor",
+    "model_version": "v1",
+    "operation_type": "fixture_structured_extraction",
+    "provider_name": "mock_grafilab",
+    "request_id": "extract-en-001",
+    "status": "success"
+  },
+  "normalized_demand": {
+    "colour": "grey",
+    "deadline_at": "2026-06-21T11:00:00+08:00",
+    "dimension_mm_height": 600,
+    "dimension_mm_width": 600,
+    "equipment_category": "tile_cutter",
+    "equipment_duration_days": 2,
+    "material_category": "porcelain_tile",
+    "product_code": "PG-600-GREY",
+    "quantity_units": 500
+  },
+  "request_id": "extract-en-001",
+  "requires_manual_review": false,
+  "source_type": "typed_text",
+  "warnings": [
+    {
+      "code": "LOW_CONFIDENCE_CONFIRMATION_REQUIRED",
+      "field_name": null,
+      "message": "One or more extracted fields require careful confirmation before submission."
+    }
+  ]
+}
