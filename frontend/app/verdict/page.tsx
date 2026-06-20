@@ -1,147 +1,206 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 
-export default function EvidencePage() {
+import Badge from "@/components/ui/badge";
+import Card from "@/components/ui/card";
+import Container from "@/components/ui/container";
+import PageHeader from "@/components/ui/pageHeader";
+import { recalculateRecommendation, submitDecision } from "@/lib/api";
+import { sessionStore } from "@/lib/session";
+import type { RecommendationOutput } from "@/types/recommendation";
+
+const URGENT_DEADLINE = "2026-06-21T09:30:00+08:00";
+
+export default function VerdictPage() {
   const router = useRouter();
+  const [recommendation, setRecommendation] = useState<RecommendationOutput | null>(null);
+  const [error, setError] = useState("");
+  const [recalculating, setRecalculating] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  // ✅ Fix hydration issue: freeze timestamp once
-  const [timestamp] = useState(() => new Date().toISOString());
+  useEffect(() => {
+    let active = true;
 
-  const evidence = {
-    request: "500 porcelain tiles + tile cutter needed by tomorrow",
+    async function loadStoredRecommendation() {
+      const stored = sessionStore.getRecommendation();
+      await Promise.resolve();
 
-    selectedResources: [
-      "Site A - 300 tiles",
-      "Site B - 130 tiles (inspection required)",
-      "Supplier F - 70 tiles (new supply)",
-      "Site D - tile cutter",
-    ],
+      if (!active) {
+        return;
+      }
 
-    excludedResources: [
-      "Site E - uncertain condition (unreadable label)",
-    ],
+      if (stored) {
+        setRecommendation(stored);
+        return;
+      }
 
-    cost: {
-      baseline: 12500,
-      greenproof: 9100,
-      savings: 3400,
-    },
+      setError("No recommendation was found. Please complete the earlier steps first.");
+    }
 
-    carbon: {
-      baseline: 1600,
-      greenproof: 720,
-      saved: 880,
-    },
+    loadStoredRecommendation();
 
-    decision: "Approved - Partial Reuse Plan",
-    timestamp,
-  };
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  async function handleUrgency() {
+    if (!recommendation) return;
+    try {
+      setRecalculating(true);
+      const updated = await recalculateRecommendation(
+        recommendation.recommendation_id,
+        URGENT_DEADLINE,
+      );
+      sessionStore.setRecommendation(updated);
+      setRecommendation(updated);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to recalculate urgency.");
+    } finally {
+      setRecalculating(false);
+    }
+  }
+
+  async function handleDecision(
+    decisionType:
+      | "approve"
+      | "request_inspection"
+      | "reject"
+      | "proceed_with_normal_procurement",
+  ) {
+    if (!recommendation) return;
+    try {
+      setSubmitting(true);
+      const result = await submitDecision(recommendation.recommendation_id, decisionType);
+      sessionStore.setEvidence(result.evidence_record);
+      router.push("/evidence");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to submit the decision.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+    <Container>
+      <div className="space-y-6">
+        <PageHeader
+          title="GreenProof Verdict"
+          subtitle="Compare cost, carbon, urgency, exclusions, and approval actions from the backend recommendation."
+        />
 
-        {/* HEADER */}
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold">Evidence Record</h1>
-          <p className="text-sm text-gray-500">
-            Immutable audit trail of GreenProof decision
-          </p>
-        </div>
+        {error ? (
+          <Card>
+            <div className="text-sm text-red-600">{error}</div>
+          </Card>
+        ) : null}
 
-        {/* REQUEST */}
-        <div className="bg-white border rounded-xl p-5">
-          <h2 className="font-medium mb-2">Original Request</h2>
-          <p className="text-sm text-gray-600">{evidence.request}</p>
-        </div>
-
-        {/* DECISION */}
-        <div className="bg-white border rounded-xl p-5">
-          <h2 className="font-medium mb-2">Final Decision</h2>
-
-          <div className="text-green-600 font-semibold">
-            {evidence.decision}
-          </div>
-
-          <div className="text-xs text-gray-500 mt-2">
-            Timestamp: {evidence.timestamp}
-          </div>
-        </div>
-
-        {/* RESOURCES */}
-        <div className="grid gap-4">
-
-          {/* SELECTED */}
-          <div className="bg-white border rounded-xl p-5">
-            <h3 className="font-medium mb-3">Selected Resources</h3>
-
-            <ul className="space-y-2 text-sm">
-              {evidence.selectedResources.map((item, i) => (
-                <li key={i} className="flex gap-2 text-gray-700">
-                  <span className="text-green-600">✔</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* EXCLUDED */}
-          <div className="bg-white border rounded-xl p-5">
-            <h3 className="font-medium mb-3">Excluded Resources</h3>
-
-            <ul className="space-y-2 text-sm">
-              {evidence.excludedResources.map((item, i) => (
-                <li key={i} className="flex gap-2 text-gray-500">
-                  <span className="text-red-500">✖</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        {/* IMPACT */}
-        <div className="bg-white border rounded-xl p-5">
-          <h3 className="font-medium mb-3">Impact Summary</h3>
-
-          <div className="grid grid-cols-2 gap-4 text-sm">
-
-            {/* COST */}
-            <div className="p-3 border rounded-lg">
-              <div className="text-gray-500">Cost Savings</div>
-              <div className="text-lg font-semibold text-green-600">
-                RM {evidence.cost.savings}
+        {recommendation ? (
+          <>
+            <Card>
+              <div className="flex justify-between items-center gap-3">
+                <div>
+                  <div className="font-medium">Recommendation verdict</div>
+                  <div className="text-sm text-gray-500">
+                    {recommendation.verdict}
+                  </div>
+                </div>
+                <Badge
+                  label={recommendation.deadline_met ? "Deadline met" : "Manual review"}
+                  type={recommendation.deadline_met ? "green" : "red"}
+                />
               </div>
-              <div className="text-xs text-gray-500">
-                {evidence.cost.greenproof} vs {evidence.cost.baseline}
+            </Card>
+
+            <Card>
+              <h2 className="text-sm font-medium mb-3">Plan comparison</h2>
+              <div className="space-y-2 text-sm text-gray-700">
+                <div>
+                  Selected materials:{" "}
+                  {recommendation.selected_material_resources
+                    .map((item) => `${item.site_name}: ${item.quantity_units}`)
+                    .join(", ")}
+                </div>
+                <div>Supplier F shortfall: {recommendation.supplier_shortfall_units}</div>
+                <div>
+                  Equipment: {recommendation.selected_equipment?.site_name || "No equipment selected"}
+                </div>
+                <div>
+                  Net saving: RM {Number(recommendation.cost_breakdown.net_saving_myr).toFixed(2)}
+                </div>
+                <div>
+                  Carbon avoided:{" "}
+                  {Number(recommendation.carbon_breakdown.net_carbon_avoided_kgco2e).toFixed(2)} kgCO2e
+                </div>
               </div>
+            </Card>
+
+            <Card>
+              <h2 className="text-sm font-medium mb-3">Urgency</h2>
+              <div className="space-y-3">
+                <div className="text-sm text-gray-600">
+                  Use backend recalculation to test the prepared urgent three-hour scenario.
+                </div>
+                <button
+                  onClick={handleUrgency}
+                  disabled={recalculating}
+                  className="w-full border border-black rounded-xl py-3 text-sm font-medium disabled:opacity-50"
+                >
+                  {recalculating ? "Recalculating..." : "Switch to three-hour urgency"}
+                </button>
+              </div>
+            </Card>
+
+            <Card>
+              <h2 className="text-sm font-medium mb-3">Exclusions and conditions</h2>
+              <div className="space-y-3 text-sm text-gray-600">
+                {recommendation.excluded_resources.map((resource) => (
+                  <div key={resource.resource_id}>
+                    <div className="font-medium text-gray-800">{resource.site_name}</div>
+                    <div>{resource.reason_text}</div>
+                  </div>
+                ))}
+                {recommendation.conditions.map((condition, index) => (
+                  <div key={`${condition}-${index}`}>{condition}</div>
+                ))}
+              </div>
+            </Card>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => handleDecision("approve")}
+                disabled={submitting}
+                className="w-full bg-black text-white py-3 rounded-xl font-medium disabled:opacity-50"
+              >
+                Approve Plan
+              </button>
+              <button
+                onClick={() => handleDecision("request_inspection")}
+                disabled={submitting}
+                className="w-full border border-black py-3 rounded-xl font-medium"
+              >
+                Request Inspection
+              </button>
+              <button
+                onClick={() => handleDecision("proceed_with_normal_procurement")}
+                disabled={submitting}
+                className="w-full border border-gray-300 py-3 rounded-xl font-medium"
+              >
+                Proceed with Normal Procurement
+              </button>
+              <button
+                onClick={() => handleDecision("reject")}
+                disabled={submitting}
+                className="w-full text-sm text-gray-500"
+              >
+                Reject
+              </button>
             </div>
-
-            {/* CARBON */}
-            <div className="p-3 border rounded-lg">
-              <div className="text-gray-500">Carbon Reduction</div>
-              <div className="text-lg font-semibold text-green-600">
-                {evidence.carbon.saved} kg CO₂e
-              </div>
-              <div className="text-xs text-gray-500">
-                {evidence.carbon.greenproof} vs {evidence.carbon.baseline}
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* CTA */}
-        <button
-          onClick={() => router.push("/")}
-          className="w-full bg-black text-white py-3 rounded-xl font-medium hover:bg-gray-800"
-        >
-          New Request
-        </button>
-
+          </>
+        ) : null}
       </div>
-    </div>
+    </Container>
   );
 }

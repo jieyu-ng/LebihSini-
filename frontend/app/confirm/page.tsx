@@ -2,125 +2,192 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Badge from "@/components/ui/badge";
+import Container from "@/components/ui/container";
+import Card from "@/components/ui/card";
+import PageHeader from "@/components/ui/pageHeader";
+import { confirmExtraction, extractRequest } from "@/lib/api";
+import { sessionStore } from "@/lib/session";
+import type { StructuredExtractionResponse } from "@/types/requirement";
 
 export default function ConfirmPage() {
   const router = useRouter();
-
-  const [loadingStage, setLoadingStage] = useState(0);
-  const [data, setData] = useState<any>(null);
+  const [loadingMessage, setLoadingMessage] = useState("Reading your request...");
+  const [extraction, setExtraction] = useState<StructuredExtractionResponse | null>(null);
+  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | null>>({});
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    // fake AI pipeline
-    const stages = [
-      "Reading your request",
-      "Extracting material specifications",
-      "Checking missing information",
-    ];
+    let active = true;
 
-    let i = 0;
-
-    const interval = setInterval(() => {
-      setLoadingStage(i);
-
-      if (i === stages.length) {
-        clearInterval(interval);
-
-        // MOCK extracted AI output
-        setData({
-          material: "porcelain_tile",
-          dimensions: "600x600",
-          colour: "grey",
-          quantity: 500,
-          deadline: "Tomorrow 11:00",
-          equipment: "tile_cutter",
-          confidence: {
-            material: 0.96,
-            quantity: 0.83,
-            deadline: 0.94,
-          },
-        });
-
+    async function loadExtraction() {
+      const draft = sessionStore.getDraft();
+      if (!draft) {
+        if (active) {
+          setError("No request draft was found. Please submit a request first.");
+        }
         return;
       }
+      try {
+        setLoadingMessage("Extracting material specifications...");
+        const result = await extractRequest(draft);
+        if (!active) {
+          return;
+        }
+        sessionStore.setExtraction(result);
+        setExtraction(result);
+        setFormValues(result.normalized_demand);
+      } catch (err) {
+        if (!active) {
+          return;
+        }
+        setError(err instanceof Error ? err.message : "Unable to extract the request.");
+      }
+    }
 
-      i++;
-    }, 900);
+    loadExtraction();
 
-    return () => clearInterval(interval);
+    return () => {
+      active = false;
+    };
   }, []);
 
-  if (!data) {
-    const messages = [
-      "Reading your request...",
-      "Extracting material specifications...",
-      "Checking missing information...",
-    ];
-
+  if (!extraction && !error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
-        <div className="text-center space-y-3">
-          <div className="text-lg font-medium">
-            {messages[loadingStage] || "Processing..."}
-          </div>
-          <div className="text-sm text-gray-500">
-            AI is analysing your request
+      <Container>
+        <div className="min-h-[60vh] flex justify-center items-center">
+          <div className="text-center space-y-3">
+            <div className="text-lg font-medium">{loadingMessage}</div>
+            <div className="text-sm text-gray-500">
+              AI is analysing your request through the backend extraction pipeline.
+            </div>
           </div>
         </div>
-      </div>
+      </Container>
     );
   }
 
+  async function handleConfirm() {
+    if (!extraction) {
+      return;
+    }
+    try {
+      setSubmitting(true);
+      setError("");
+      const confirmation = await confirmExtraction(
+        extraction.extraction_id,
+        formValues,
+      );
+      sessionStore.setConfirmation(confirmation);
+      router.push("/resources");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to confirm the extraction.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 flex justify-center">
-      <div className="w-full max-w-2xl px-4 py-6 space-y-4">
+    <Container>
+      <div className="space-y-4">
+        <PageHeader
+          title="Confirm Requirement"
+          subtitle="Review extracted fields, confidence, and missing information before generating the plan."
+        />
 
-        <h1 className="text-xl font-semibold">Confirm Requirement</h1>
+        {error ? (
+          <Card>
+            <div className="space-y-3">
+              <div className="text-sm text-red-600">{error}</div>
+              <button
+                onClick={() => router.push("/")}
+                className="w-full bg-black text-white py-3 rounded-xl"
+              >
+                Back to Request
+              </button>
+            </div>
+          </Card>
+        ) : null}
 
-        {/* Editable Fields */}
-        <div className="bg-white border rounded-xl p-4 space-y-3">
+        {sessionStore.getDraft()?.isDemoFixture ? (
+          <Card>
+            <div className="flex items-center justify-between gap-3">
+              <div className="text-sm text-gray-600">
+                {sessionStore.getDraft()?.fixtureLabel}
+              </div>
+              <Badge label="Demo fixture" type="gray" />
+            </div>
+          </Card>
+        ) : null}
 
-          <Input label="Material" value={data.material} />
-          <Input label="Dimensions" value={data.dimensions} />
-          <Input label="Colour" value={data.colour} />
-          <Input label="Quantity" value={data.quantity} />
-          <Input label="Deadline" value={data.deadline} />
-          <Input label="Equipment" value={data.equipment} />
+        {extraction ? (
+          <Card>
+            <div className="space-y-3">
+              {extraction.extracted_fields.map((field) => (
+                <div key={field.field_name} className="space-y-1">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="text-xs text-gray-500">{field.field_name}</div>
+                    <Badge
+                      label={`${field.confidence_label} ${field.confidence_score}`}
+                      type={
+                        field.confidence_label === "high"
+                          ? "green"
+                          : field.confidence_label === "medium"
+                            ? "amber"
+                            : "red"
+                      }
+                    />
+                  </div>
+                  <input
+                    className="w-full border rounded-lg p-2 text-sm"
+                    value={String(formValues[field.field_name] ?? "")}
+                    onChange={(e) =>
+                      setFormValues((current) => ({
+                        ...current,
+                        [field.field_name]: e.target.value,
+                      }))
+                    }
+                  />
+                  {field.warning ? (
+                    <div className="text-xs text-amber-600">{field.warning}</div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : null}
 
-        </div>
+        {extraction?.warnings?.length ? (
+          <Card>
+            <h2 className="text-sm font-medium mb-2">Warnings</h2>
+            <div className="space-y-2 text-sm text-gray-600">
+              {extraction.warnings.map((warning, index) => (
+                <div key={`${warning.code}-${index}`}>{warning.message}</div>
+              ))}
+            </div>
+          </Card>
+        ) : null}
 
-        {/* Confidence Panel */}
-        <div className="bg-white border rounded-xl p-4">
-          <h2 className="text-sm font-medium mb-2">AI Confidence</h2>
+        {extraction?.missing_critical_fields?.length ? (
+          <Card>
+            <h2 className="text-sm font-medium mb-2">Missing critical fields</h2>
+            <div className="space-y-2 text-sm text-red-600">
+              {extraction.missing_critical_fields.map((warning) => (
+                <div key={warning.field_name}>{warning.message}</div>
+              ))}
+            </div>
+          </Card>
+        ) : null}
 
-          <div className="space-y-2 text-sm text-gray-600">
-            <div>Material: {data.confidence.material}</div>
-            <div>Quantity: {data.confidence.quantity}</div>
-            <div>Deadline: {data.confidence.deadline}</div>
-          </div>
-        </div>
-
-        {/* Actions */}
         <button
-          onClick={() => router.push("/resources")}
-          className="w-full bg-black text-white py-2 rounded-lg"
+          onClick={handleConfirm}
+          disabled={!extraction || submitting}
+          className="w-full bg-black text-white py-3 rounded-lg disabled:opacity-50"
         >
-          Confirm & Continue
+          {submitting ? "Confirming..." : "Confirm & Continue"}
         </button>
-
       </div>
-    </div>
-  );
-}
-
-/* small reusable input */
-function Input({ label, value }: any) {
-  return (
-    <div>
-      <div className="text-xs text-gray-500">{label}</div>
-      <input
-        className="w-full border rounded-lg p-2 text-sm"
-        defaultValue={value}
-      />
-    </div>
+    </Container>
   );
 }
