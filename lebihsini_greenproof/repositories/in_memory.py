@@ -71,3 +71,22 @@ class InMemoryRepository:
     def next_evidence_id(self) -> str:
         return self._next_id("evidence", "evd")
 
+    # ResourceRepository methods
+    def list_materials(self) -> list[MaterialResourcePassport]:
+        return list(self.material_passports.values())
+
+    def list_equipment(self) -> list[EquipmentResourcePassport]:
+        return list(self.equipment_passports.values())
+
+    def get_material(self, resource_id: str) -> MaterialResourcePassport | None:
+        return self.material_passports.get(resource_id)
+
+    def get_equipment(self, resource_id: str) -> EquipmentResourcePassport | None:
+        return self.equipment_passports.get(resource_id)
+
+    # EvidenceRecordRepository methods
+    def save(self, record_id: str, record_payload: dict, decided_by: str, decided_at: str, recommendation_id: str) -> None:
+        self.evidence_records[record_id] = record_payload
+
+    def get(self, record_id: str) -> dict | None:
+        return self.evidence_records.get(record_id)

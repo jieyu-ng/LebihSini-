@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import Column, String, Integer, Boolean, JSON, ForeignKey
 from sqlalchemy.orm import relationship
 from .database import Base
@@ -30,6 +32,28 @@ class MaterialResource(Base):
     verification_status = Column(String)
     raw_data = Column(JSON)
 
+    def to_domain(self):
+        from .contracts import MaterialResourcePassport, RiskCategory, VerificationStatus
+        data = self.raw_data.copy()
+        if isinstance(data.get("risk_category"), str):
+            data["risk_category"] = RiskCategory(data["risk_category"])
+        if isinstance(data.get("verification_status"), str):
+            data["verification_status"] = VerificationStatus(data["verification_status"])
+        return MaterialResourcePassport(**data)
+
+    @classmethod
+    def from_domain(cls, domain) -> MaterialResource:
+        from .serialization import to_jsonable
+        return cls(
+            resource_id=domain.resource_id,
+            site_id=domain.site_id,
+            category=domain.category,
+            quantity_units=domain.quantity_units,
+            risk_category=domain.risk_category.value,
+            verification_status=domain.verification_status.value,
+            raw_data=to_jsonable(domain)
+        )
+
 class EquipmentResource(Base):
     __tablename__ = "equipment_resources"
     resource_id = Column(String, primary_key=True, index=True)
@@ -38,6 +62,27 @@ class EquipmentResource(Base):
     is_commercial_fallback = Column(Boolean, default=False)
     verification_status = Column(String)
     raw_data = Column(JSON)
+
+    def to_domain(self):
+        from .contracts import EquipmentResourcePassport, RiskCategory, VerificationStatus
+        data = self.raw_data.copy()
+        if isinstance(data.get("risk_category"), str):
+            data["risk_category"] = RiskCategory(data["risk_category"])
+        if isinstance(data.get("verification_status"), str):
+            data["verification_status"] = VerificationStatus(data["verification_status"])
+        return EquipmentResourcePassport(**data)
+
+    @classmethod
+    def from_domain(cls, domain) -> EquipmentResource:
+        from .serialization import to_jsonable
+        return cls(
+            resource_id=domain.resource_id,
+            site_id=domain.site_id,
+            category=domain.category,
+            is_commercial_fallback=domain.is_commercial_fallback,
+            verification_status=domain.verification_status.value,
+            raw_data=to_jsonable(domain)
+        )
 
 class Recommendation(Base):
     __tablename__ = "recommendations"
@@ -53,3 +98,18 @@ class EvidenceRecord(Base):
     decided_by = Column(String)
     decided_at = Column(String)
     raw_data = Column(JSON)
+
+    def to_domain(self):
+        from .contracts import EvidenceRecord as DomainEvidenceRecord
+        return DomainEvidenceRecord(**self.raw_data)
+
+    @classmethod
+    def from_domain(cls, domain) -> EvidenceRecord:
+        from .serialization import to_jsonable
+        return cls(
+            record_id=domain.record_id,
+            recommendation_id=domain.recommendation.recommendation_id,
+            decided_by=domain.human_decision.decided_by,
+            decided_at=domain.human_decision.decided_at,
+            raw_data=to_jsonable(domain)
+        )

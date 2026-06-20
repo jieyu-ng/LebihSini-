@@ -13,10 +13,13 @@ from lebihsini_greenproof.repositories.in_memory import InMemoryRepository
 from lebihsini_greenproof.services.extraction_service import ServiceError
 
 
+from lebihsini_greenproof.repositories import WorkflowRepository, EvidenceRecordRepository
+
 class EvidenceService:
-    def __init__(self, repository: InMemoryRepository, dataset: DemoDataset) -> None:
+    def __init__(self, repository: WorkflowRepository, dataset: DemoDataset, evidence_repository: EvidenceRecordRepository | None = None) -> None:
         self.repository = repository
         self.dataset = dataset
+        self.evidence_repository = evidence_repository
 
     def record_decision(
         self,
@@ -85,9 +88,25 @@ class EvidenceService:
             "provider_metadata": extraction_snapshot["provider_metadata"] if extraction_snapshot else None,
         }
         self.repository.evidence_records[record_id] = evidence
+        
+        # Persist if an evidence repository is available
+        if self.evidence_repository is not None:
+            self.evidence_repository.save(
+                record_id=record_id,
+                record_payload=evidence,
+                decided_by=actor_reference,
+                decided_at=decided_at,
+                recommendation_id=stored.recommendation.recommendation_id,
+            )
+            
         return decision_payload, evidence
 
     def get_evidence_record(self, record_id: str) -> dict:
+        if self.evidence_repository is not None:
+            record = self.evidence_repository.get(record_id)
+            if record is not None:
+                return record
+                
         record = self.repository.evidence_records.get(record_id)
         if record is None:
             raise ServiceError("EVIDENCE_RECORD_NOT_FOUND", "Evidence record was not found.", status_code=404)
