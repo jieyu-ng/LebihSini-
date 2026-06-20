@@ -142,6 +142,7 @@ def extract_demand_from_audio(file_bytes: bytes, filename: str) -> DemandRequest
         notes=f"Extracted from uploaded audio file: {filename}. Demo data loaded successfully."
     )
 
+#extract request from text
 @app.post("/api/extract-request", response_model=schemas.ExtractRequestResponse)
 def extract_request(payload: schemas.ExtractRequestPayload):
     # Mocking Grafilab integration
@@ -166,7 +167,7 @@ async def extract_request_audio(file: UploadFile = File(...)):
             f"Successfully processed audio upload '{file.filename}'."
         ]
     )
-
+#get recommendations
 @app.post("/api/recommendations")
 def get_recommendations(payload: schemas.RecommendationsPayload, db: Session = Depends(get_db)):
     # 1. Load default system-wide configuration parameters (supplier specs, carbon rates, etc)
@@ -277,6 +278,7 @@ def recalculate_recommendations(payload: schemas.RecalculatePayload, db: Session
     recommendation = generate_recommendation(dataset, dataset.demand, scenario)
     return to_dict(recommendation)
 
+#
 @app.post("/api/recommendations/{id}/decision")
 def capture_decision(id: str, payload: schemas.DecisionPayload, db: Session = Depends(get_db)):
     # Create the HumanApprovalDecision
@@ -360,6 +362,7 @@ def capture_decision(id: str, payload: schemas.DecisionPayload, db: Session = De
     
     return schemas.DecisionResponse(status="recorded", decision_id=payload.decision_id)
 
+#get everything
 @app.get("/api/resources")
 def list_resources(db: Session = Depends(get_db)):
     mats = db.query(models.MaterialResource).all()
@@ -388,6 +391,7 @@ def list_resources(db: Session = Depends(get_db)):
         
     return {"items": items}
 
+#get a specific object
 @app.get("/api/resources/{id}")
 def get_resource(id: str, db: Session = Depends(get_db)):
     mat = db.query(models.MaterialResource).filter(models.MaterialResource.resource_id == id).first()
@@ -398,6 +402,7 @@ def get_resource(id: str, db: Session = Depends(get_db)):
         return eq.raw_data
     raise HTTPException(status_code=404, detail="Resource not found")
 
+#Get an record about details of acceptance
 @app.get("/api/evidence-records/{id}")
 def get_evidence_record(id: str, db: Session = Depends(get_db)):
     record = db.query(models.EvidenceRecord).filter(models.EvidenceRecord.record_id == id).first()
