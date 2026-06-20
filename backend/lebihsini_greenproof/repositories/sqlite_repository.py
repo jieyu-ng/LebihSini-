@@ -1,6 +1,6 @@
 from typing import List, Optional
 from sqlalchemy.orm import Session
-from ..models import MaterialResource, EquipmentResource, EvidenceRecord as DBEvidenceRecord
+from ..db.models import MaterialResource, EquipmentResource, EvidenceRecord as DBEvidenceRecord
 from ..contracts import MaterialResourcePassport, EquipmentResourcePassport, EvidenceRecord
 
 class SQLiteRepository:
