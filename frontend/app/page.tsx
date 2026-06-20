@@ -10,13 +10,13 @@ import Button from "@/components/ui/button";
 
 export default function HomePage() {
   const router = useRouter();
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(
+  "Need 500 grey porcelain tiles 600x600 and 1 tile cutter by tomorrow 11am for Site C"
+);
 
   function handleSubmit() {
-    if (!input.trim()) return;
-
-    localStorage.setItem("mockRequest", input);
-    router.push("/confirm");
+  localStorage.setItem("mockRequest", input);
+  router.push("/confirm");
   }
 
   return (
