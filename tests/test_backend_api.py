@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from fastapi.testclient import TestClient
 
@@ -17,7 +18,38 @@ class BackendApiTests(unittest.TestCase):
         body = response.json()
         self.assertEqual(body["provider_mode"], "mock")
         self.assertEqual(body["storage_mode"], "in_memory")
+        self.assertEqual(body["provider_model"], "mock_grafilab")
         self.assertNotIn("api_key", str(body).lower())
+
+    def test_health_reports_grafilab_mode_without_revealing_credentials(self) -> None:
+        with patch.dict("os.environ", {"GREENPROOF_PROVIDER_MODE": "grafilab", "GRAFILAB_API_KEY": ""}, clear=False):
+            app = create_app()
+            client = TestClient(app)
+            response = client.get("/api/health")
+        self.assertEqual(response.status_code, 200)
+        body = response.json()
+        self.assertEqual(body["provider_mode"], "grafilab")
+        self.assertFalse(body["provider_configured"])
+        self.assertEqual(body["provider_model"], "grafilab/qwen3.6-flash")
+        self.assertNotIn("api_key", str(body).lower())
+
+    def test_grafilab_mode_without_key_fails_clearly(self) -> None:
+        with patch.dict("os.environ", {"GREENPROOF_PROVIDER_MODE": "grafilab", "GRAFILAB_API_KEY": ""}, clear=False):
+            app = create_app()
+            client = TestClient(app)
+            response = client.post(
+                "/api/extract-request",
+                json={
+                    "request_id": "real-missing-key-001",
+                    "source_type": "typed_text",
+                    "content": "Need 500 grey porcelain tiles 600x600 tomorrow and a tile cutter for two days.",
+                    "content_reference": "text://typed/en/request-001",
+                    "input_language": "en-MY",
+                    "reference_datetime": "2026-06-20T09:00:00+08:00",
+                },
+            )
+        self.assertEqual(response.status_code, 503)
+        self.assertEqual(response.json()["error"]["code"], "AI_PROVIDER_UNAVAILABLE")
 
     def test_bahasa_fixture_extraction(self) -> None:
         response = self.client.post(

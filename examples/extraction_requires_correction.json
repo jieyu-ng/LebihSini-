@@ -153,6 +153,7 @@
   "model_metadata": {
     "model_name": "mock-demand-extractor",
     "model_version": "v1",
+    "operation_type": "fixture_structured_extraction",
     "provider_name": "mock_grafilab",
     "request_id": "extract-handwritten-001",
     "status": "success"

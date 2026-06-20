@@ -31,6 +31,7 @@ class MockGrafilabProvider(AIProvider):
                 "model_name": "mock-demand-extractor",
                 "model_version": "v1",
                 "request_id": request.request_id,
+                "operation_type": "fixture_structured_extraction",
                 **payload,
             }
         )
@@ -57,6 +58,7 @@ class MockGrafilabProvider(AIProvider):
                 "model_name": "mock-resource-extractor",
                 "model_version": "v1",
                 "request_id": request.request_id,
+                "operation_type": "fixture_resource_structuring",
                 **payload,
             }
         )
@@ -69,6 +71,7 @@ class MockGrafilabProvider(AIProvider):
                 "model_name": "mock-explainer",
                 "model_version": "v1",
                 "request_id": payload.get("request_id", "mock-explanation"),
+                "operation_type": "fixture_plain_language_explanation",
                 "text": f"Mock explanation generated for {prompt_name}.",
             }
         )

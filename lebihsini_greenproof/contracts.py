@@ -407,6 +407,7 @@ class AIModelMetadata:
     model_version: str
     status: ProviderStatus
     request_id: str
+    operation_type: str | None = None
 
 
 @dataclass(slots=True)

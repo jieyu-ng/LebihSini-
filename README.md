@@ -38,8 +38,7 @@ This repository currently provides the shared optimisation foundation for the ha
 ## What Is Intentionally Not Implemented
 
 - frontend application
-- Grafilab OCR or voice integration
-- real Grafilab network client calls
+- raw Grafilab OCR and raw voice transcription integration
 - real routing optimisation
 - authentication, payments, or production deployment
 
@@ -70,6 +69,10 @@ Environment variables:
 - `GREENPROOF_PROVIDER_MODE=mock` by default
 - `GREENPROOF_PROVIDER_API_KEY_ENV=GRAFILAB_API_KEY` for explicit real-provider mode
 - `GREENPROOF_CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000`
+- `GRAFILAB_API_KEY` required for `GREENPROOF_PROVIDER_MODE=grafilab`
+- `GRAFILAB_BASE_URL=https://console-api.grafilab.ai/api/oai/v1`
+- `GRAFILAB_TEXT_MODEL=grafilab/qwen3.6-flash`
+- `GRAFILAB_TIMEOUT_SECONDS=15.0`
 
 State is in-memory only and resets on process restart.
 
@@ -97,6 +100,8 @@ tests/                    Contract, extraction, engine, backend, serialization, 
 - Reuse the deterministic serializer rather than creating a second schema system.
 - Keep raw AI/provider output outside the optimiser boundary until a confirmed `DemandRequest` exists.
 - Treat the FastAPI repository state as demo-only because it is explicitly in-memory.
+- Keep `GREENPROOF_PROVIDER_MODE=mock` as the default for tests and offline demos.
+- Use real Grafilab mode only for Phase 1 text structuring with the official OpenAI-compatible base URL and text model.
 
 ## How The Optimiser Developer Should Begin
 
@@ -123,3 +128,28 @@ tests/                    Contract, extraction, engine, backend, serialization, 
 
 Demo prices, travel times, transport rates, and carbon factors are provisional assumptions for the hackathon scenario. They should remain transparent and easy to adjust.
 Grafilab integration is currently mocked offline because no official API details were present in this repository.
+
+## Real Grafilab Phase 1
+
+Supported in real-provider mode:
+
+- typed English demand text
+- typed Bahasa Malaysia demand text
+- already-available transcript text
+- already-available OCR text for structuring
+
+Not supported in real-provider mode yet:
+
+- raw image OCR
+- raw PDF/document upload understanding
+- raw WhatsApp screenshot understanding
+- raw audio transcription
+- raw resource-photo understanding
+
+Optional real smoke test:
+
+```powershell
+python scripts\run_grafilab_smoke_test.py
+```
+
+This script makes a real network call only when `GRAFILAB_API_KEY` is set. It never prints the key and only sends harmless typed text.

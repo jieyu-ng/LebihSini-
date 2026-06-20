@@ -26,12 +26,16 @@ def get_provider(request: Request) -> AIProvider:
     mode = request.app.state.provider_mode
     if mode == "mock":
         return MockGrafilabProvider()
-    api_key_env_var = request.app.state.provider_api_key_env_var
-    client = GrafilabClient(api_key_env_var=api_key_env_var)
+    client = GrafilabClient(
+        api_key_env_var=request.app.state.provider_api_key_env_var,
+        base_url=request.app.state.provider_base_url,
+        text_model=request.app.state.provider_text_model,
+        timeout_seconds=request.app.state.provider_timeout_seconds,
+    )
     if not client.api_key:
         raise ServiceError(
             "AI_PROVIDER_UNAVAILABLE",
-            f"Real provider mode is configured but `{api_key_env_var}` is not set.",
+            f"Real provider mode is configured but `{request.app.state.provider_api_key_env_var}` is not set.",
             status_code=503,
         )
     return client
@@ -58,6 +62,9 @@ def build_runtime_state() -> dict:
         "dataset": load_demo_dataset(),
         "provider_mode": provider_mode,
         "provider_api_key_env_var": os.getenv("GREENPROOF_PROVIDER_API_KEY_ENV", "GRAFILAB_API_KEY"),
+        "provider_base_url": os.getenv("GRAFILAB_BASE_URL", "https://console-api.grafilab.ai/api/oai/v1"),
+        "provider_text_model": os.getenv("GRAFILAB_TEXT_MODEL", "grafilab/qwen3.6-flash"),
+        "provider_timeout_seconds": float(os.getenv("GRAFILAB_TIMEOUT_SECONDS", "15.0")),
         "cors_origins": [
             origin.strip()
             for origin in os.getenv("GREENPROOF_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")

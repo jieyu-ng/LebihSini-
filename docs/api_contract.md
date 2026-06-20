@@ -365,6 +365,10 @@ Example:
 ## Provider Notes
 
 - mock-provider mode is the default for tests and demos
-- real Grafilab integration remains scaffolded only
+- real Grafilab Phase 1 uses `https://console-api.grafilab.ai/api/oai/v1`
+- real Grafilab Phase 1 uses `grafilab/qwen3.6-flash` for text structuring
+- `GRAFILAB_API_KEY` is required for real-provider mode
+- Phase 1 real mode supports typed text, transcript text, and OCR text structuring only
+- raw images, PDFs, screenshots, resource photos, and raw audio transcription remain unsupported in real mode
 - no Grafilab endpoints were invented in this implementation
 - all backend state is explicitly in-memory

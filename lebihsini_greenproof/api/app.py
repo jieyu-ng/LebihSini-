@@ -34,6 +34,9 @@ def create_app() -> FastAPI:
     app.state.dataset = runtime_state["dataset"]
     app.state.provider_mode = runtime_state["provider_mode"]
     app.state.provider_api_key_env_var = runtime_state["provider_api_key_env_var"]
+    app.state.provider_base_url = runtime_state["provider_base_url"]
+    app.state.provider_text_model = runtime_state["provider_text_model"]
+    app.state.provider_timeout_seconds = runtime_state["provider_timeout_seconds"]
 
     app.add_middleware(
         CORSMiddleware,
