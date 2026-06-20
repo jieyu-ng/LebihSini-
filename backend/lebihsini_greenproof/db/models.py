@@ -33,7 +33,7 @@ class MaterialResource(Base):
     raw_data = Column(JSON)
 
     def to_domain(self):
-        from .contracts import MaterialResourcePassport, RiskCategory, VerificationStatus
+        from ..contracts import MaterialResourcePassport, RiskCategory, VerificationStatus
         data = self.raw_data.copy()
         if isinstance(data.get("risk_category"), str):
             data["risk_category"] = RiskCategory(data["risk_category"])
@@ -43,7 +43,7 @@ class MaterialResource(Base):
 
     @classmethod
     def from_domain(cls, domain) -> MaterialResource:
-        from .serialization import to_jsonable
+        from ..serialization import to_jsonable
         return cls(
             resource_id=domain.resource_id,
             site_id=domain.site_id,
@@ -64,7 +64,7 @@ class EquipmentResource(Base):
     raw_data = Column(JSON)
 
     def to_domain(self):
-        from .contracts import EquipmentResourcePassport, RiskCategory, VerificationStatus
+        from ..contracts import EquipmentResourcePassport, RiskCategory, VerificationStatus
         data = self.raw_data.copy()
         if isinstance(data.get("risk_category"), str):
             data["risk_category"] = RiskCategory(data["risk_category"])
@@ -74,7 +74,7 @@ class EquipmentResource(Base):
 
     @classmethod
     def from_domain(cls, domain) -> EquipmentResource:
-        from .serialization import to_jsonable
+        from ..serialization import to_jsonable
         return cls(
             resource_id=domain.resource_id,
             site_id=domain.site_id,
@@ -100,12 +100,12 @@ class EvidenceRecord(Base):
     raw_data = Column(JSON)
 
     def to_domain(self):
-        from .contracts import EvidenceRecord as DomainEvidenceRecord
+        from ..contracts import EvidenceRecord as DomainEvidenceRecord
         return DomainEvidenceRecord(**self.raw_data)
 
     @classmethod
     def from_domain(cls, domain) -> EvidenceRecord:
-        from .serialization import to_jsonable
+        from ..serialization import to_jsonable
         return cls(
             record_id=domain.record_id,
             recommendation_id=domain.recommendation.recommendation_id,

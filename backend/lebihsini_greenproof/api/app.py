@@ -33,8 +33,8 @@ logger = logging.getLogger("lebihsini_greenproof.api")
 async def lifespan(app: FastAPI):
     # Initialize DB safely
     if app.state.resource_store == "sqlite":
-        from ..database import engine, Base
-        from ..models import MaterialResource, EquipmentResource
+        from ..db.database import engine, Base
+        from ..db.models import MaterialResource, EquipmentResource
         from sqlalchemy.orm import Session
         import os
         

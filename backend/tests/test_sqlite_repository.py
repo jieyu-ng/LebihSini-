@@ -2,8 +2,8 @@ import unittest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from lebihsini_greenproof.database import Base
-from lebihsini_greenproof.models import MaterialResource, EquipmentResource, EvidenceRecord
+from lebihsini_greenproof.db.database import Base
+from lebihsini_greenproof.db.models import MaterialResource, EquipmentResource, EvidenceRecord
 from lebihsini_greenproof.repositories.sqlite_repository import SQLiteRepository
 from lebihsini_greenproof.demo_data import load_demo_dataset
 

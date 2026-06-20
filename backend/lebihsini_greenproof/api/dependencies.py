@@ -14,7 +14,7 @@ from lebihsini_greenproof.services.extraction_service import ExtractionService, 
 from lebihsini_greenproof.services.recommendation_service import RecommendationService
 
 def get_db():
-    from lebihsini_greenproof.database import SessionLocal
+    from lebihsini_greenproof.db.database import SessionLocal
     db = SessionLocal()
     try:
         yield db
