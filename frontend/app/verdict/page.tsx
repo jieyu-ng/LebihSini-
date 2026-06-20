@@ -1,206 +1,186 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
-import Badge from "@/components/ui/badge";
-import Card from "@/components/ui/card";
-import Container from "@/components/ui/container";
-import PageHeader from "@/components/ui/pageHeader";
-import { recalculateRecommendation, submitDecision } from "@/lib/api";
-import { sessionStore } from "@/lib/session";
-import type { RecommendationOutput } from "@/types/recommendation";
-
-const URGENT_DEADLINE = "2026-06-21T09:30:00+08:00";
+import { useState } from "react";
 
 export default function VerdictPage() {
   const router = useRouter();
-  const [recommendation, setRecommendation] = useState<RecommendationOutput | null>(null);
-  const [error, setError] = useState("");
-  const [recalculating, setRecalculating] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [approving, setApproving] = useState(false);
 
-  useEffect(() => {
-    let active = true;
+  const verdict = {
+    recommendedPlan: "GreenProof Hybrid Reuse Plan",
 
-    async function loadStoredRecommendation() {
-      const stored = sessionStore.getRecommendation();
-      await Promise.resolve();
+    reasons: [
+      "Sufficient reuse material available from Site A & B",
+      "Equipment already available at Site D (no rental needed)",
+      "Supplier F fills material shortfall efficiently",
+      "Optimised transport distance across sites",
+    ],
 
-      if (!active) {
-        return;
-      }
+    conditions: [
+      "Site B tiles require inspection before final approval",
+      "Delivery must be completed before 11:00 tomorrow",
+    ],
 
-      if (stored) {
-        setRecommendation(stored);
-        return;
-      }
+    excludedResources: ["Site E – Unverified condition (High risk)"],
 
-      setError("No recommendation was found. Please complete the earlier steps first.");
-    }
+    confidenceBreakdown: {
+      materialMatch: 0.94,
+      availability: 0.88,
+      riskAssessment: 0.79,
+      deadlineFeasibility: 0.85,
+    },
+  };
 
-    loadStoredRecommendation();
+  function approve() {
+    setApproving(true);
 
-    return () => {
-      active = false;
-    };
-  }, []);
+    setTimeout(() => {
+      localStorage.setItem("decision", "approved");
+      localStorage.setItem("selectedPlan", "greenproof");
 
-  async function handleUrgency() {
-    if (!recommendation) return;
-    try {
-      setRecalculating(true);
-      const updated = await recalculateRecommendation(
-        recommendation.recommendation_id,
-        URGENT_DEADLINE,
-      );
-      sessionStore.setRecommendation(updated);
-      setRecommendation(updated);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to recalculate urgency.");
-    } finally {
-      setRecalculating(false);
-    }
+      router.push("/evidence");
+    }, 1200);
   }
 
-  async function handleDecision(
-    decisionType:
-      | "approve"
-      | "request_inspection"
-      | "reject"
-      | "proceed_with_normal_procurement",
-  ) {
-    if (!recommendation) return;
-    try {
-      setSubmitting(true);
-      const result = await submitDecision(recommendation.recommendation_id, decisionType);
-      sessionStore.setEvidence(result.evidence_record);
-      router.push("/evidence");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to submit the decision.");
-    } finally {
-      setSubmitting(false);
-    }
+  function modify() {
+    localStorage.setItem("returningFrom", "verdict");
+    router.push("/plans");
+  }
+
+  function normalPurchase() {
+    localStorage.setItem("mode", "normal");
+    router.push("/resources");
+  }
+
+  function requestInspection() {
+    localStorage.setItem("inspectionMode", "true");
+    router.push("/resources");
+  }
+
+  function reject() {
+    localStorage.clear();
+    router.push("/");
   }
 
   return (
-    <Container>
-      <div className="space-y-6">
-        <PageHeader
-          title="GreenProof Verdict"
-          subtitle="Compare cost, carbon, urgency, exclusions, and approval actions from the backend recommendation."
-        />
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
 
-        {error ? (
-          <Card>
-            <div className="text-sm text-red-600">{error}</div>
-          </Card>
-        ) : null}
+        {/* HEADER */}
+        <div>
+          <h1 className="text-2xl font-semibold">Verdict</h1>
+          <p className="text-sm text-gray-500">
+            AI-generated procurement decision summary
+          </p>
+        </div>
 
-        {recommendation ? (
-          <>
-            <Card>
-              <div className="flex justify-between items-center gap-3">
-                <div>
-                  <div className="font-medium">Recommendation verdict</div>
-                  <div className="text-sm text-gray-500">
-                    {recommendation.verdict}
-                  </div>
-                </div>
-                <Badge
-                  label={recommendation.deadline_met ? "Deadline met" : "Manual review"}
-                  type={recommendation.deadline_met ? "green" : "red"}
-                />
-              </div>
-            </Card>
+        {/* RECOMMENDED PLAN */}
+        <div className="bg-white border rounded-xl p-5">
+          <h2 className="font-medium mb-2">Recommended Plan</h2>
+          <p className="text-green-700 font-semibold">
+            {verdict.recommendedPlan}
+          </p>
+        </div>
 
-            <Card>
-              <h2 className="text-sm font-medium mb-3">Plan comparison</h2>
-              <div className="space-y-2 text-sm text-gray-700">
-                <div>
-                  Selected materials:{" "}
-                  {recommendation.selected_material_resources
-                    .map((item) => `${item.site_name}: ${item.quantity_units}`)
-                    .join(", ")}
-                </div>
-                <div>Supplier F shortfall: {recommendation.supplier_shortfall_units}</div>
-                <div>
-                  Equipment: {recommendation.selected_equipment?.site_name || "No equipment selected"}
-                </div>
-                <div>
-                  Net saving: RM {Number(recommendation.cost_breakdown.net_saving_myr).toFixed(2)}
-                </div>
-                <div>
-                  Carbon avoided:{" "}
-                  {Number(recommendation.carbon_breakdown.net_carbon_avoided_kgco2e).toFixed(2)} kgCO2e
-                </div>
-              </div>
-            </Card>
+        {/* REASONS */}
+        <div className="bg-white border rounded-xl p-5">
+          <h2 className="font-medium mb-3">Reasons</h2>
+          <ul className="space-y-2 text-sm">
+            {verdict.reasons.map((r, i) => (
+              <li key={i} className="text-gray-700 flex gap-2">
+                <span className="text-blue-600">•</span>
+                {r}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            <Card>
-              <h2 className="text-sm font-medium mb-3">Urgency</h2>
-              <div className="space-y-3">
-                <div className="text-sm text-gray-600">
-                  Use backend recalculation to test the prepared urgent three-hour scenario.
-                </div>
-                <button
-                  onClick={handleUrgency}
-                  disabled={recalculating}
-                  className="w-full border border-black rounded-xl py-3 text-sm font-medium disabled:opacity-50"
-                >
-                  {recalculating ? "Recalculating..." : "Switch to three-hour urgency"}
-                </button>
-              </div>
-            </Card>
+        {/* CONDITIONS */}
+        <div className="bg-white border rounded-xl p-5">
+          <h2 className="font-medium mb-3">Conditions</h2>
+          <ul className="space-y-2 text-sm">
+            {verdict.conditions.map((c, i) => (
+              <li key={i} className="text-yellow-700 flex gap-2">
+                <span>⚠</span>
+                {c}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            <Card>
-              <h2 className="text-sm font-medium mb-3">Exclusions and conditions</h2>
-              <div className="space-y-3 text-sm text-gray-600">
-                {recommendation.excluded_resources.map((resource) => (
-                  <div key={resource.resource_id}>
-                    <div className="font-medium text-gray-800">{resource.site_name}</div>
-                    <div>{resource.reason_text}</div>
-                  </div>
-                ))}
-                {recommendation.conditions.map((condition, index) => (
-                  <div key={`${condition}-${index}`}>{condition}</div>
-                ))}
-              </div>
-            </Card>
+        {/* EXCLUDED */}
+        <div className="bg-white border rounded-xl p-5">
+          <h2 className="font-medium mb-3">Excluded Resources</h2>
+          <ul className="space-y-2 text-sm">
+            {verdict.excludedResources.map((e, i) => (
+              <li key={i} className="text-red-600 flex gap-2">
+                <span>✖</span>
+                {e}
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            <div className="space-y-3">
-              <button
-                onClick={() => handleDecision("approve")}
-                disabled={submitting}
-                className="w-full bg-black text-white py-3 rounded-xl font-medium disabled:opacity-50"
-              >
-                Approve Plan
-              </button>
-              <button
-                onClick={() => handleDecision("request_inspection")}
-                disabled={submitting}
-                className="w-full border border-black py-3 rounded-xl font-medium"
-              >
-                Request Inspection
-              </button>
-              <button
-                onClick={() => handleDecision("proceed_with_normal_procurement")}
-                disabled={submitting}
-                className="w-full border border-gray-300 py-3 rounded-xl font-medium"
-              >
-                Proceed with Normal Procurement
-              </button>
-              <button
-                onClick={() => handleDecision("reject")}
-                disabled={submitting}
-                className="w-full text-sm text-gray-500"
-              >
-                Reject
-              </button>
-            </div>
-          </>
-        ) : null}
+        {/* CONFIDENCE */}
+        <div className="bg-white border rounded-xl p-5">
+          <h2 className="font-medium mb-3">Confidence</h2>
+
+          <div className="text-sm space-y-1 text-gray-700">
+            <div>Material Match: {verdict.confidenceBreakdown.materialMatch}</div>
+            <div>Availability: {verdict.confidenceBreakdown.availability}</div>
+            <div>Risk Assessment: {verdict.confidenceBreakdown.riskAssessment}</div>
+            <div>Deadline Feasibility: {verdict.confidenceBreakdown.deadlineFeasibility}</div>
+          </div>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="grid gap-3">
+
+          <button
+            onClick={approve}
+            className="w-full bg-green-600 text-white py-3 rounded-xl"
+          >
+            {approving ? "Generating Audit Log..." : "Approve"}
+          </button>
+
+          <button
+            onClick={modify}
+            className="w-full bg-blue-600 text-white py-3 rounded-xl"
+          >
+            Modify Plan
+          </button>
+
+          <button
+            onClick={normalPurchase}
+            className="w-full bg-black text-white py-3 rounded-xl"
+          >
+            Proceed with Normal Purchase
+          </button>
+
+          <button
+            onClick={requestInspection}
+            className="w-full bg-yellow-600 text-white py-3 rounded-xl"
+          >
+            Request Inspection
+          </button>
+
+          <button
+            onClick={reject}
+            className="w-full bg-red-600 text-white py-3 rounded-xl"
+          >
+            Reject
+          </button>
+
+          <button
+            onClick={() => router.push("/evidence")}
+            className="w-full border py-3 rounded-xl"
+          >
+            View Evidence Record
+          </button>
+        </div>
+
       </div>
-    </Container>
+    </div>
   );
 }
