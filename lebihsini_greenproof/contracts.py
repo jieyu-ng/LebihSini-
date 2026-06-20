@@ -40,6 +40,7 @@ class ApprovalDecisionType(StrEnum):
     APPROVE = "approve"
     MODIFY = "modify"
     REJECT = "reject"
+    PROCEED_WITH_NORMAL_PROCUREMENT = "proceed_with_normal_procurement"
     REQUEST_INSPECTION = "request_inspection"
 
 

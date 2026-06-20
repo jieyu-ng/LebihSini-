@@ -1,6 +1,6 @@
 # LebihSini GreenProof API Contract
 
-All request and response shapes below use canonical `snake_case` and are documented for MVP frontend/backend alignment. FastAPI routes are not implemented in this repository yet.
+All request and response shapes use canonical `snake_case`. The FastAPI backend is now implemented as an in-memory MVP orchestration layer over the existing deterministic modules.
 
 Units:
 
@@ -10,7 +10,7 @@ Units:
 - travel time: minutes
 - money: Malaysian ringgit
 - carbon: kgCO2e
-- confidence: decimal between 0.0 and 1.0
+- confidence: decimal between `0.0` and `1.0`
 - datetime: ISO 8601
 
 ## Common Error Shape
@@ -19,13 +19,13 @@ Units:
 {
   "error": {
     "code": "MISSING_CRITICAL_FIELD",
-    "message": "Critical field `deadline_at` is missing and must be confirmed before submission.",
+    "message": "Quantity must be confirmed before generating a recommendation.",
     "details": {}
   }
 }
 ```
 
-Standard codes:
+Standard error codes:
 
 - `INPUT_UNREADABLE`
 - `UNSUPPORTED_INPUT_TYPE`
@@ -34,15 +34,34 @@ Standard codes:
 - `AI_PROVIDER_UNAVAILABLE`
 - `INVALID_PROVIDER_OUTPUT`
 - `MANUAL_INSPECTION_REQUIRED`
-- `DEADLINE_INFEASIBLE`
+- `RESOURCE_NOT_FOUND`
+- `RECOMMENDATION_NOT_FOUND`
+- `EVIDENCE_RECORD_NOT_FOUND`
+- `INVALID_DECISION`
+- `INTERNAL_ERROR`
+
+## GET /api/health
+
+Status: implemented
+
+Returns:
+
+- service status
+- API version
+- calculation version
+- provider mode
+- storage mode
+
+Notes:
+
+- state is in-memory only
+- default provider mode is `mock`
 
 ## POST /api/extract-request
 
-Purpose: send one raw input through the AI extraction boundary.
+Status: implemented
 
-Status: future contract only
-
-Request body:
+Request model:
 
 ```json
 {
@@ -56,34 +75,35 @@ Request body:
 }
 ```
 
-Response body:
+Response model:
 
-Use [examples/bahasa_voice_extraction.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/bahasa_voice_extraction.json) as the canonical example.
-
-Required fields:
-
-- `request_id`
-- `source_type`
-- `detected_language`
+- `extraction_id`
 - `extracted_fields`
 - `missing_fields`
+- `missing_critical_fields`
 - `warnings`
-- `model_metadata`
+- `provider_metadata`
+- `confirmation_status`
 - `can_proceed_to_confirmation`
 - `requires_manual_review`
 - `normalized_demand`
 
-## POST /api/extract-request/confirm
+Example:
 
-Purpose: convert a structured extraction into confirmed values after user review.
+- [examples/bahasa_voice_extraction.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/bahasa_voice_extraction.json)
 
-Status: future contract only
+Confirmation requirement:
 
-Request body:
+- raw provider output must still be confirmed before optimisation
+
+## POST /api/extractions/{extraction_id}/confirm
+
+Status: implemented
+
+Request model:
 
 ```json
 {
-  "request_id": "extract-bm-001",
   "action": "accept",
   "confirmed_values": {
     "product_code": "PG-600-GREY"
@@ -92,27 +112,143 @@ Request body:
 }
 ```
 
-Response body:
+Response model:
 
-Use [examples/confirmed_demand.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/confirmed_demand.json) as the canonical example.
+- `confirmation_id`
+- `status`
+- `confirmed_fields`
+- `warnings`
+- `confirmed_demand` when validation succeeds
 
-Notes:
+Example:
 
-- confirmed values become the system of record
-- raw provider values must not go directly into the optimiser
-- missing critical fields must block confirmed demand creation
+- [examples/confirmed_demand.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/confirmed_demand.json)
 
-## POST /api/recommendations
+Confirmation requirement:
 
-Purpose: generate a recommendation from a confirmed demand request.
+- unresolved critical fields return `MISSING_CRITICAL_FIELD`
 
-Status: future contract only
+## POST /api/material-passports
 
-Request body:
+Status: implemented
+
+Request model:
 
 ```json
 {
-  "demand": {
+  "request_id": "resource-site-a-001",
+  "source_type": "resource_photo",
+  "content": "site a photo",
+  "content_reference": "demo://resource/site-a-photo-001",
+  "input_language": "en-MY",
+  "resource_id": "mat-site-a-tiles"
+}
+```
+
+Response model:
+
+- `request_id`
+- `resource_kind`
+- `can_enter_automatic_matching`
+- `requires_manual_review`
+- `warnings`
+- `generated_material_passport`
+
+Examples:
+
+- [examples/site_a_material_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_a_material_passport.json)
+- [examples/site_e_provisional_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_e_provisional_passport.json)
+
+Notes:
+
+- Site E remains manual-review only
+- state is stored in-memory for the running process
+
+## POST /api/equipment-passports
+
+Status: implemented
+
+Request model:
+
+```json
+{
+  "request_id": "resource-site-d-001",
+  "source_type": "resource_photo",
+  "content": "site d photo",
+  "content_reference": "demo://resource/site-d-photo-001",
+  "input_language": "en-MY",
+  "resource_id": "eq-site-d-cutter"
+}
+```
+
+Response model:
+
+- `request_id`
+- `resource_kind`
+- `can_enter_automatic_matching`
+- `requires_manual_review`
+- `warnings`
+- `generated_equipment_passport`
+
+Example:
+
+- [examples/site_d_equipment_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_d_equipment_passport.json)
+
+## GET /api/resources
+
+Status: implemented
+
+Query filters:
+
+- `resource_type`
+- `material_category`
+- `equipment_category`
+- `risk_category`
+- `verification_status`
+- `site_id`
+- `automatic_matching_eligibility`
+
+Response model:
+
+```json
+{
+  "items": [],
+  "storage_mode": "in_memory",
+  "count": 0
+}
+```
+
+Notes:
+
+- uses the demo dataset plus any in-memory generated passports
+
+## GET /api/resources/{resource_id}
+
+Status: implemented
+
+Returns one material or equipment resource.
+
+Errors:
+
+- `RESOURCE_NOT_FOUND`
+
+## POST /api/recommendations
+
+Status: implemented
+
+Request model:
+
+```json
+{
+  "confirmed_demand_id": "cnf-0001"
+}
+```
+
+Alternative request model:
+
+```json
+{
+  "confirmed_demand": {
     "demand_id": "demand-confirmed-extract-bm-001",
     "requesting_site_id": "site-c",
     "material_category": "porcelain_tile",
@@ -134,98 +270,101 @@ Request body:
 }
 ```
 
-Response body:
+Response model:
 
-Use [examples/recommendation_response_tomorrow.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/recommendation_response_tomorrow.json) as the canonical example.
+- full `RecommendationOutput`
 
-## POST /api/recommendations/recalculate
+Examples:
 
-Purpose: recalculate a recommendation after a deadline change.
+- [examples/recommendation_response_tomorrow.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/recommendation_response_tomorrow.json)
 
-Status: future contract only
+Confirmation requirement:
 
-Request body:
+- raw unconfirmed extraction output cannot be used here
+
+## POST /api/recommendations/{recommendation_id}/recalculate
+
+Status: implemented
+
+Request model:
 
 ```json
 {
-  "scenario_id": "three-hour-deadline",
   "revised_deadline_at": "2026-06-21T09:30:00+08:00"
 }
 ```
 
-Response body:
+Response model:
 
-Use [examples/recommendation_response_three_hours.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/recommendation_response_three_hours.json) as the canonical example.
+- full recalculated `RecommendationOutput`
 
-## POST /api/resources/material-passports
+Example:
 
-Purpose: convert a resource-photo extraction into a provisional or confirmed material passport.
+- [examples/recommendation_response_three_hours.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/recommendation_response_three_hours.json)
 
-Status: future contract only
+## POST /api/recommendations/{recommendation_id}/decision
 
-Request body:
+Status: implemented
 
-```json
-{
-  "request_id": "resource-site-a-001",
-  "source_type": "resource_photo",
-  "content_reference": "demo://resource/site-a-photo-001"
-}
-```
-
-Response body:
-
-Use [examples/site_a_material_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_a_material_passport.json) as the standard successful example and [examples/site_e_provisional_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_e_provisional_passport.json) as the manual-review example.
-
-## POST /api/resources/equipment-passports
-
-Purpose: convert a resource-photo extraction into a provisional equipment passport.
-
-Status: future contract only
-
-Response body:
-
-Use [examples/site_d_equipment_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/site_d_equipment_passport.json) as the canonical example.
-
-## GET /api/resources
-
-Purpose: list prepared material and equipment resources for the current cluster.
-
-Status: future contract only
-
-## GET /api/resources/{id}
-
-Purpose: retrieve one stored material or equipment passport.
-
-Status: future contract only
-
-Use [examples/material_resource_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/material_resource_passport.json) and [examples/equipment_resource_passport.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/equipment_resource_passport.json) as canonical examples.
-
-## GET /api/evidence-records/{id}
-
-Purpose: return the stored evidence record after human action.
-
-Status: future contract only
-
-Use [examples/evidence_record.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/evidence_record.json) as the canonical example.
-
-## GET /api/health
-
-Purpose: basic health check for future backend deployment.
-
-Status: future contract only
-
-Response body:
+Request model:
 
 ```json
 {
-  "status": "ok"
+  "decision_type": "approve",
+  "actor_reference": "demo.user@lebihsini.test",
+  "decided_at": "2026-06-20T12:05:00+08:00",
+  "override_notes": "Approved after checking Site B inspection condition.",
+  "modified_plan_details": {}
 }
 ```
 
-## AI Provider Notes
+Supported decisions:
 
-- The application depends on a provider interface, not a Grafilab-specific response shape.
-- Official Grafilab endpoint and credential details were not present in this repository.
-- The current implementation therefore uses a deterministic mock provider for offline tests and demos.
-- Production Grafilab integration remains scaffolded only.
+- `approve`
+- `modify`
+- `reject`
+- `proceed_with_normal_procurement`
+- `request_inspection`
+
+Response model:
+
+- `decision`
+- `evidence_record`
+
+Notes:
+
+- human decision is mandatory
+- state is stored in-memory only
+
+## GET /api/evidence-records/{record_id}
+
+Status: implemented
+
+Response model includes:
+
+- `name` set to `GreenProof Evidence Record`
+- original request
+- extraction result and evidence
+- confirmed demand
+- resources considered, selected, excluded
+- cost and carbon comparison
+- recommendation
+- user decision
+- final approved plan
+- calculation version
+- provider metadata when available
+
+Errors:
+
+- `EVIDENCE_RECORD_NOT_FOUND`
+
+Example:
+
+- [examples/evidence_record.json](C:/Users/ganka/Downloads/Imagine/LebihSini-/examples/evidence_record.json)
+
+## Provider Notes
+
+- mock-provider mode is the default for tests and demos
+- real Grafilab integration remains scaffolded only
+- no Grafilab endpoints were invented in this implementation
+- all backend state is explicitly in-memory
