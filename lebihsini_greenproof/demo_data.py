@@ -148,6 +148,37 @@ def load_demo_dataset() -> DemoDataset:
             has_required_documentation=False,
             evidence_notes=["Product label unreadable.", "Stored outdoors.", "Specification cannot be confidently confirmed."],
         ),
+        #added this 
+        MaterialResourcePassport(
+            resource_id="mat-site-f-tiles",
+            site_id="site-f",
+            site_name="Site F - Kinrara",
+            category="porcelain_tile",
+            brand="DemoBrand",
+            product_code="PG-600-GREY",                   # 1. Match the demand code
+            dimension_mm_width=600,
+            dimension_mm_height=600,
+            colour="grey",
+            quantity_units=100,
+            transfer_price_myr_per_unit=0.00,             # RM 0.00 (Free!)
+            packaging_status="sealed",                    # Good condition
+            storage_condition="indoor_dry",
+            rescue_deadline_at="2026-06-22T18:00:00+08:00",
+            available_from_at="2026-06-20T08:00:00+08:00",
+            collection_window_start_at="2026-06-20T08:00:00+08:00",
+            collection_window_end_at="2026-06-21T18:30:00+08:00",
+            distance_to_site_km=14.0,
+            travel_time_to_site_minutes=45,
+            transport_rate_myr_per_km=4.0,
+            vehicle_factor_kgco2e_per_km=0.27,
+            embodied_carbon_kgco2e_per_unit=1.80,
+            confidence=0.95,
+            risk_category=RiskCategory.GREEN,              # 2. Set to low-risk
+            verification_status=VerificationStatus.VERIFIED,# 3. Set to verified
+            inspection_required=False,
+            has_required_documentation=True,               # 4. Supply documentation
+            evidence_notes=["Verified surplus, sealed box."],
+        ),
         MaterialResourcePassport(
             resource_id="mat-site-g-wrong-size",
             site_id="site-g",
