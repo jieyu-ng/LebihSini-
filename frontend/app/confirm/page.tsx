@@ -2,192 +2,169 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Badge from "@/components/ui/badge";
-import Container from "@/components/ui/container";
-import Card from "@/components/ui/card";
-import PageHeader from "@/components/ui/pageHeader";
-import { confirmExtraction, extractRequest } from "@/lib/api";
-import { sessionStore } from "@/lib/session";
-import type { StructuredExtractionResponse } from "@/types/requirement";
 
 export default function ConfirmPage() {
   const router = useRouter();
-  const [loadingMessage, setLoadingMessage] = useState("Reading your request...");
-  const [extraction, setExtraction] = useState<StructuredExtractionResponse | null>(null);
-  const [formValues, setFormValues] = useState<Record<string, string | number | boolean | null>>({});
-  const [error, setError] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+
+  const [loadingStage, setLoadingStage] = useState(0);
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    let active = true;
+    const stages = [
+      "Reading your request",
+      "Extracting material specifications",
+      "Checking missing information",
+    ];
 
-    async function loadExtraction() {
-      const draft = sessionStore.getDraft();
-      if (!draft) {
-        if (active) {
-          setError("No request draft was found. Please submit a request first.");
-        }
+    let i = 0;
+
+    const interval = setInterval(() => {
+      setLoadingStage(i);
+
+      if (i === stages.length) {
+        clearInterval(interval);
+
+        setData({
+          material: "porcelain_tile",
+          dimensions: "600x600",
+          colour: "grey",
+          quantity: 500,
+          deadline: "Tomorrow 11:00",
+          equipment: "tile_cutter",
+          confidence: {
+            material: 0.96,
+            dimensions: 0.91,
+            colour: 0.88,
+            quantity: 0.83,
+            deadline: 0.94,
+            equipment: 0.89,
+          },
+        });
+
         return;
       }
-      try {
-        setLoadingMessage("Extracting material specifications...");
-        const result = await extractRequest(draft);
-        if (!active) {
-          return;
-        }
-        sessionStore.setExtraction(result);
-        setExtraction(result);
-        setFormValues(result.normalized_demand);
-      } catch (err) {
-        if (!active) {
-          return;
-        }
-        setError(err instanceof Error ? err.message : "Unable to extract the request.");
-      }
-    }
 
-    loadExtraction();
+      i++;
+    }, 900);
 
-    return () => {
-      active = false;
-    };
+    return () => clearInterval(interval);
   }, []);
 
-  if (!extraction && !error) {
+  // loading state
+  if (!data) {
+    const messages = [
+      "Reading your request...",
+      "Extracting material specifications...",
+      "Checking missing information...",
+    ];
+
     return (
-      <Container>
-        <div className="min-h-[60vh] flex justify-center items-center">
-          <div className="text-center space-y-3">
-            <div className="text-lg font-medium">{loadingMessage}</div>
-            <div className="text-sm text-gray-500">
-              AI is analysing your request through the backend extraction pipeline.
-            </div>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center space-y-2">
+          <div className="text-lg font-medium">
+            {messages[loadingStage] || "Processing..."}
+          </div>
+          <div className="text-sm text-gray-500">
+            AI is analysing your request
           </div>
         </div>
-      </Container>
+      </div>
     );
   }
 
-  async function handleConfirm() {
-    if (!extraction) {
-      return;
-    }
-    try {
-      setSubmitting(true);
-      setError("");
-      const confirmation = await confirmExtraction(
-        extraction.extraction_id,
-        formValues,
-      );
-      sessionStore.setConfirmation(confirmation);
-      router.push("/resources");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unable to confirm the extraction.");
-    } finally {
-      setSubmitting(false);
-    }
+  // update field helper
+  function updateField(field: string, value: string) {
+    setData((prev: any) => ({
+      ...prev,
+      [field]: value,
+    }));
   }
 
   return (
-    <Container>
-      <div className="space-y-4">
-        <PageHeader
-          title="Confirm Requirement"
-          subtitle="Review extracted fields, confidence, and missing information before generating the plan."
-        />
+    <div className="min-h-screen bg-gray-50 flex justify-center">
+      <div className="w-full max-w-2xl px-4 py-6 space-y-4">
 
-        {error ? (
-          <Card>
-            <div className="space-y-3">
-              <div className="text-sm text-red-600">{error}</div>
-              <button
-                onClick={() => router.push("/")}
-                className="w-full bg-black text-white py-3 rounded-xl"
-              >
-                Back to Request
-              </button>
-            </div>
-          </Card>
-        ) : null}
+        <h1 className="text-xl font-semibold">
+          Confirm Requirement
+        </h1>
 
-        {sessionStore.getDraft()?.isDemoFixture ? (
-          <Card>
-            <div className="flex items-center justify-between gap-3">
-              <div className="text-sm text-gray-600">
-                {sessionStore.getDraft()?.fixtureLabel}
-              </div>
-              <Badge label="Demo fixture" type="gray" />
-            </div>
-          </Card>
-        ) : null}
+        {/* EDITABLE FIELDS */}
+        <div className="bg-white border rounded-xl p-4 space-y-4">
 
-        {extraction ? (
-          <Card>
-            <div className="space-y-3">
-              {extraction.extracted_fields.map((field) => (
-                <div key={field.field_name} className="space-y-1">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="text-xs text-gray-500">{field.field_name}</div>
-                    <Badge
-                      label={`${field.confidence_label} ${field.confidence_score}`}
-                      type={
-                        field.confidence_label === "high"
-                          ? "green"
-                          : field.confidence_label === "medium"
-                            ? "amber"
-                            : "red"
-                      }
-                    />
-                  </div>
-                  <input
-                    className="w-full border rounded-lg p-2 text-sm"
-                    value={String(formValues[field.field_name] ?? "")}
-                    onChange={(e) =>
-                      setFormValues((current) => ({
-                        ...current,
-                        [field.field_name]: e.target.value,
-                      }))
-                    }
-                  />
-                  {field.warning ? (
-                    <div className="text-xs text-amber-600">{field.warning}</div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </Card>
-        ) : null}
+          <Field
+            label="Material"
+            value={data.material}
+            confidence={data.confidence.material}
+            onChange={(v: string) => updateField("material", v)}
+          />
 
-        {extraction?.warnings?.length ? (
-          <Card>
-            <h2 className="text-sm font-medium mb-2">Warnings</h2>
-            <div className="space-y-2 text-sm text-gray-600">
-              {extraction.warnings.map((warning, index) => (
-                <div key={`${warning.code}-${index}`}>{warning.message}</div>
-              ))}
-            </div>
-          </Card>
-        ) : null}
+          <Field
+            label="Dimensions"
+            value={data.dimensions}
+            confidence={data.confidence.dimensions}
+            onChange={(v:string) => updateField("dimensions", v)}
+          />
 
-        {extraction?.missing_critical_fields?.length ? (
-          <Card>
-            <h2 className="text-sm font-medium mb-2">Missing critical fields</h2>
-            <div className="space-y-2 text-sm text-red-600">
-              {extraction.missing_critical_fields.map((warning) => (
-                <div key={warning.field_name}>{warning.message}</div>
-              ))}
-            </div>
-          </Card>
-        ) : null}
+          <Field
+            label="Colour"
+            value={data.colour}
+            confidence={data.confidence.colour}
+            onChange={(v:string) => updateField("colour", v)}
+          />
 
+          <Field
+            label="Quantity"
+            value={data.quantity}
+            confidence={data.confidence.quantity}
+            onChange={(v:string) => updateField("quantity", v)}
+          />
+
+          <Field
+            label="Deadline"
+            value={data.deadline}
+            confidence={data.confidence.deadline}
+            onChange={(v:string) => updateField("deadline", v)}
+          />
+
+          <Field
+            label="Equipment"
+            value={data.equipment}
+            confidence={data.confidence.equipment}
+            onChange={(v:string) => updateField("equipment", v)}
+          />
+        </div>
+
+        {/* ACTION */}
         <button
-          onClick={handleConfirm}
-          disabled={!extraction || submitting}
-          className="w-full bg-black text-white py-3 rounded-lg disabled:opacity-50"
+          onClick={() => router.push("/resources")}
+          className="w-full bg-black text-white py-2 rounded-lg"
         >
-          {submitting ? "Confirming..." : "Confirm & Continue"}
+          Confirm & Continue
         </button>
       </div>
-    </Container>
+    </div>
+  );
+}
+
+/* FIELD COMPONENT */
+function Field({
+  label,
+  value,
+  confidence,
+  onChange,
+}: any) {
+  return (
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs text-gray-500">
+        <span>{label}</span>
+        <span>Confidence: {confidence}</span>
+      </div>
+
+      <input
+        className="w-full border rounded-lg p-2 text-sm"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
   );
 }
