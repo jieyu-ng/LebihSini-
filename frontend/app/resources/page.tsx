@@ -134,7 +134,7 @@ export default function ResourcesPage() {
 
         {/* NEXT STEP BUTTON */}
         <button
-          onClick={() => router.push("/verdict")}
+          onClick={() => router.push("/plans")}
           className="w-full bg-black text-white py-3 rounded-xl font-medium hover:bg-gray-800"
         >
           Generate GreenProof Verdict

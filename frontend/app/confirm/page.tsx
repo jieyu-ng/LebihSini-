@@ -10,7 +10,6 @@ export default function ConfirmPage() {
   const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    // fake AI pipeline
     const stages = [
       "Reading your request",
       "Extracting material specifications",
@@ -25,7 +24,6 @@ export default function ConfirmPage() {
       if (i === stages.length) {
         clearInterval(interval);
 
-        // MOCK extracted AI output
         setData({
           material: "porcelain_tile",
           dimensions: "600x600",
@@ -35,8 +33,11 @@ export default function ConfirmPage() {
           equipment: "tile_cutter",
           confidence: {
             material: 0.96,
+            dimensions: 0.91,
+            colour: 0.88,
             quantity: 0.83,
             deadline: 0.94,
+            equipment: 0.89,
           },
         });
 
@@ -49,6 +50,7 @@ export default function ConfirmPage() {
     return () => clearInterval(interval);
   }, []);
 
+  // loading state
   if (!data) {
     const messages = [
       "Reading your request...",
@@ -57,8 +59,8 @@ export default function ConfirmPage() {
     ];
 
     return (
-      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
-        <div className="text-center space-y-3">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center space-y-2">
           <div className="text-lg font-medium">
             {messages[loadingStage] || "Processing..."}
           </div>
@@ -70,56 +72,98 @@ export default function ConfirmPage() {
     );
   }
 
+  // update field helper
+  function updateField(field: string, value: string) {
+    setData((prev: any) => ({
+      ...prev,
+      [field]: value,
+    }));
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center">
       <div className="w-full max-w-2xl px-4 py-6 space-y-4">
 
-        <h1 className="text-xl font-semibold">Confirm Requirement</h1>
+        <h1 className="text-xl font-semibold">
+          Confirm Requirement
+        </h1>
 
-        {/* Editable Fields */}
-        <div className="bg-white border rounded-xl p-4 space-y-3">
+        {/* EDITABLE FIELDS */}
+        <div className="bg-white border rounded-xl p-4 space-y-4">
 
-          <Input label="Material" value={data.material} />
-          <Input label="Dimensions" value={data.dimensions} />
-          <Input label="Colour" value={data.colour} />
-          <Input label="Quantity" value={data.quantity} />
-          <Input label="Deadline" value={data.deadline} />
-          <Input label="Equipment" value={data.equipment} />
+          <Field
+            label="Material"
+            value={data.material}
+            confidence={data.confidence.material}
+            onChange={(v: string) => updateField("material", v)}
+          />
 
+          <Field
+            label="Dimensions"
+            value={data.dimensions}
+            confidence={data.confidence.dimensions}
+            onChange={(v:string) => updateField("dimensions", v)}
+          />
+
+          <Field
+            label="Colour"
+            value={data.colour}
+            confidence={data.confidence.colour}
+            onChange={(v:string) => updateField("colour", v)}
+          />
+
+          <Field
+            label="Quantity"
+            value={data.quantity}
+            confidence={data.confidence.quantity}
+            onChange={(v:string) => updateField("quantity", v)}
+          />
+
+          <Field
+            label="Deadline"
+            value={data.deadline}
+            confidence={data.confidence.deadline}
+            onChange={(v:string) => updateField("deadline", v)}
+          />
+
+          <Field
+            label="Equipment"
+            value={data.equipment}
+            confidence={data.confidence.equipment}
+            onChange={(v:string) => updateField("equipment", v)}
+          />
         </div>
 
-        {/* Confidence Panel */}
-        <div className="bg-white border rounded-xl p-4">
-          <h2 className="text-sm font-medium mb-2">AI Confidence</h2>
-
-          <div className="space-y-2 text-sm text-gray-600">
-            <div>Material: {data.confidence.material}</div>
-            <div>Quantity: {data.confidence.quantity}</div>
-            <div>Deadline: {data.confidence.deadline}</div>
-          </div>
-        </div>
-
-        {/* Actions */}
+        {/* ACTION */}
         <button
           onClick={() => router.push("/resources")}
           className="w-full bg-black text-white py-2 rounded-lg"
         >
           Confirm & Continue
         </button>
-
       </div>
     </div>
   );
 }
 
-/* small reusable input */
-function Input({ label, value }: any) {
+/* FIELD COMPONENT */
+function Field({
+  label,
+  value,
+  confidence,
+  onChange,
+}: any) {
   return (
-    <div>
-      <div className="text-xs text-gray-500">{label}</div>
+    <div className="space-y-1">
+      <div className="flex justify-between text-xs text-gray-500">
+        <span>{label}</span>
+        <span>Confidence: {confidence}</span>
+      </div>
+
       <input
         className="w-full border rounded-lg p-2 text-sm"
-        defaultValue={value}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
       />
     </div>
   );

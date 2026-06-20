@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function EvidencePage() {
+export default function VerdictPage() {
   const router = useRouter();
 
   // ✅ Fix hydration issue: freeze timestamp once
@@ -135,7 +135,7 @@ export default function EvidencePage() {
 
         {/* CTA */}
         <button
-          onClick={() => router.push("/")}
+          onClick={() => router.push("/evidence")}
           className="w-full bg-black text-white py-3 rounded-xl font-medium hover:bg-gray-800"
         >
           New Request

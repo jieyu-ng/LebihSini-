@@ -10,13 +10,14 @@ import Button from "@/components/ui/button";
 
 export default function HomePage() {
   const router = useRouter();
+
   const [input, setInput] = useState(
-  "Need 500 grey porcelain tiles 600x600 and 1 tile cutter by tomorrow 11am for Site C"
-);
+    "Need 500 grey porcelain tiles 600x600 and 1 tile cutter by tomorrow 11am for Site C"
+  );
 
   function handleSubmit() {
-  localStorage.setItem("mockRequest", input);
-  router.push("/confirm");
+    localStorage.setItem("mockRequest", input);
+    router.push("/confirm");
   }
 
   return (
@@ -26,6 +27,7 @@ export default function HomePage() {
         subtitle="Multi-source construction optimisation system"
       />
 
+      {/* PRIMARY ACTION */}
       <Card>
         <div className="space-y-3">
           <div className="font-medium">
@@ -37,7 +39,6 @@ export default function HomePage() {
             rows={4}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="e.g. need 500 tiles and tile cutter tomorrow"
           />
 
           <Button onClick={handleSubmit}>
@@ -46,9 +47,31 @@ export default function HomePage() {
         </div>
       </Card>
 
-      <div className="grid grid-cols-2 gap-3 mt-4 opacity-60">
-        <Card>Scan material</Card>
-        <Card>Add equipment</Card>
+      {/* SECONDARY ACTIONS (DEMO ONLY) */}
+      <div className="grid grid-cols-2 gap-3 mt-4">
+        <Card>
+          <div className="opacity-50 text-sm text-center">
+            Scan material 
+          </div>
+        </Card>
+
+        <Card>
+          <div className="opacity-50 text-sm text-center">
+            Add idle equipment 
+          </div>
+        </Card>
+      </div>
+
+      {/* VIEW RECOMMENDATIONS */}
+      <div className="mt-3">
+        <Card>
+          <Button
+            variant="secondary"
+            onClick={() => router.push("/resources")}
+          >
+            View Recommendations →
+          </Button>
+        </Card>
       </div>
     </Container>
   );

@@ -56,7 +56,7 @@ export default function PlansPage() {
         onClick={() => router.push("/verdict")}
         className="mt-6 w-full bg-black text-white py-3 rounded-xl"
       >
-        Generate Verdict
+        Proceed to Verdict
       </button>
     </div>
   );
