@@ -4,6 +4,8 @@ import logging
 import time
 import uuid
 
+import os
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -27,9 +29,43 @@ from lebihsini_greenproof.services.extraction_service import ServiceError
 logger = logging.getLogger("lebihsini_greenproof.api")
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Initialize DB safely
+    if app.state.resource_store == "sqlite":
+        from ..db.database import engine, Base
+        from ..db.models import MaterialResource, EquipmentResource
+        from sqlalchemy.orm import Session
+        import os
+        
+        # Ensure directory exists if sqlite file is in a dir
+        db_url = os.getenv("GREENPROOF_DATABASE_URL", "sqlite:///./data/greenproof_demo.db")
+        if db_url.startswith("sqlite:///"):
+            path = db_url.replace("sqlite:///", "")
+            directory = os.path.dirname(path)
+            if directory and not os.path.exists(directory):
+                os.makedirs(directory, exist_ok=True)
+                
+        Base.metadata.create_all(bind=engine)
+        
+        # Idempotent seed
+        with Session(engine) as session:
+            mat_count = session.query(MaterialResource).count()
+            eq_count = session.query(EquipmentResource).count()
+            if mat_count == 0 and eq_count == 0:
+                dataset = app.state.dataset
+                for m in dataset.material_resources:
+                    session.add(MaterialResource.from_domain(m))
+                for e in dataset.equipment_resources:
+                    session.add(EquipmentResource.from_domain(e))
+                session.add(EquipmentResource.from_domain(dataset.commercial_equipment_fallback))
+                session.commit()
+    yield
+
 def create_app() -> FastAPI:
     runtime_state = build_runtime_state()
-    app = FastAPI(title="LebihSini GreenProof API", version="1.0.0")
+    app = FastAPI(title="LebihSini GreenProof API", version="1.0.0", lifespan=lifespan)
+    app.state.resource_store = runtime_state.get("resource_store", "in_memory")
     app.state.repository = runtime_state["repository"]
     app.state.dataset = runtime_state["dataset"]
     app.state.provider_mode = runtime_state["provider_mode"]

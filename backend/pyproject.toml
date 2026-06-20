@@ -7,7 +7,7 @@ dependencies = [
     "fastapi",
     "uvicorn",
     "sqlalchemy",
-    "pydantic"
+    "pydantic",
     "fastapi>=0.115,<1.0",
     "httpx>=0.28,<1.0",
     "openai>=1.35,<2.0",
