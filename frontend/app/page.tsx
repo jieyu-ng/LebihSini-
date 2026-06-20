@@ -1,78 +1,43 @@
-"use client";
+import Link from "next/link";
+import { ArrowRight, Building, Map } from "lucide-react";
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-
-import Container from "@/components/ui/container";
-import PageHeader from "@/components/ui/pageHeader";
-import Card from "@/components/ui/card";
-import Button from "@/components/ui/button";
-
-export default function HomePage() {
-  const router = useRouter();
-
-  const [input, setInput] = useState(
-    "Need 500 grey porcelain tiles 600x600 and 1 tile cutter by tomorrow 11am for Site C"
-  );
-
-  function handleSubmit() {
-    localStorage.setItem("mockRequest", input);
-    router.push("/confirm");
-  }
-
+export default function Home() {
   return (
-    <Container>
-      <PageHeader
-        title="LebihSini GreenProof"
-        subtitle="Multi-source construction optimisation system"
-      />
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+      <div className="max-w-3xl text-center space-y-8">
+        <h1 className="text-4xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
+          Your electricity bill tells you what you owe.
+          <span className="block text-emerald-600 mt-2">EnergiKita tells you what to do next.</span>
+        </h1>
+        
+        <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+          The AI-orchestrated bill-to-flexibility platform for Malaysian SMEs and Community Energy Operators.
+        </p>
 
-      {/* PRIMARY ACTION */}
-      <Card>
-        <div className="space-y-3">
-          <div className="font-medium">
-            Submit resource need
-          </div>
+        <div className="grid sm:grid-cols-2 gap-6 pt-8 max-w-2xl mx-auto">
+          <Link href="/sme/upload" className="group flex flex-col items-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg border border-slate-200 transition-all">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Building className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Analyse my business</h3>
+            <p className="text-slate-500 text-center mb-4 text-sm leading-relaxed">Discover your energy flexibility and save on bills.</p>
+            <div className="flex items-center text-emerald-600 font-medium mt-auto group-hover:translate-x-1 transition-transform">
+              Get Started <ArrowRight className="ml-2 w-4 h-4" />
+            </div>
+          </Link>
 
-          <textarea
-            className="w-full border rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-black"
-            rows={4}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-          />
-
-          <Button onClick={handleSubmit}>
-            Submit Request
-          </Button>
+          <Link href="/operator" className="group flex flex-col items-center p-8 bg-white rounded-2xl shadow-sm hover:shadow-lg border border-slate-200 transition-all">
+            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Map className="w-8 h-8" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-800 mb-2">Plan a solar community</h3>
+            <p className="text-slate-500 text-center mb-4 text-sm leading-relaxed">Optimize local grid distribution and identify flexible loads.</p>
+            <div className="flex items-center text-blue-600 font-medium mt-auto group-hover:translate-x-1 transition-transform">
+              View Map <ArrowRight className="ml-2 w-4 h-4" />
+            </div>
+          </Link>
         </div>
-      </Card>
-
-      {/* SECONDARY ACTIONS (DEMO ONLY) */}
-      <div className="grid grid-cols-2 gap-3 mt-4">
-        <Card>
-          <div className="opacity-50 text-sm text-center">
-            Scan material 
-          </div>
-        </Card>
-
-        <Card>
-          <div className="opacity-50 text-sm text-center">
-            Add idle equipment 
-          </div>
-        </Card>
       </div>
-
-      {/* VIEW RECOMMENDATIONS */}
-      <div className="mt-3">
-        <Card>
-          <Button
-            variant="secondary"
-            onClick={() => router.push("/resources")}
-          >
-            View Recommendations →
-          </Button>
-        </Card>
-      </div>
-    </Container>
+    </div>
   );
 }

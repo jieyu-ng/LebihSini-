@@ -1,0 +1,46 @@
+{
+  "smeProfile": {
+    "name": "Aisyah",
+    "businessName": "Aisyah Laundromat",
+    "location": "Petaling Jaya",
+    "businessType": "Laundromat",
+    "operatingHours": "08:00 - 22:00",
+    "busiestHours": "12:00 - 14:00"
+  },
+  "billData": {
+    "billingMonth": "October 2026",
+    "consumptionKwh": 3450,
+    "totalAmountRm": 1820.50,
+    "maximumDemandKw": 15.2,
+    "consumptionIncrease": "18%"
+  },
+  "equipment": [
+    {
+      "id": "eq-1",
+      "name": "Washing Machines",
+      "type": "flexible",
+      "notes": "Cycles can be shifted outside busiest hours."
+    },
+    {
+      "id": "eq-2",
+      "name": "Dryers",
+      "type": "inflexible",
+      "notes": "Must run immediately after washing, high heat demand."
+    }
+  ],
+  "optimizationResult": {
+    "flexibleLoadRange": "15-25 kWh",
+    "suggestedWindow": "11:00 AM - 4:00 PM",
+    "estimatedSavingsRm": 340.00,
+    "communityFitScore": 82,
+    "confidenceLevel": 76,
+    "recommendationText": "Move 8 kWh of flexible washing cycles to 1:00 PM and 12 kWh to 3:00 PM to avoid customer peak hours while maximizing solar."
+  },
+  "agentProgress": {
+    "billVerified": true,
+    "profileCreated": true,
+    "activitiesIdentified": true,
+    "testingPlans": false,
+    "auditing": false
+  }
+}
