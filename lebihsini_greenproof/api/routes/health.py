@@ -23,5 +23,5 @@ def get_health(request: Request) -> dict:
         "provider_mode": provider_mode,
         "provider_configured": provider_configured,
         "provider_model": "mock_grafilab" if provider_mode == "mock" else request.app.state.provider_text_model,
-        "storage_mode": "in_memory",
+        "storage_mode": getattr(request.app.state, "resource_store", "in_memory"),
     }

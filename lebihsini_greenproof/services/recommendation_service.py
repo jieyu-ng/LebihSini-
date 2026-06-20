@@ -10,10 +10,13 @@ from lebihsini_greenproof.services.extraction_service import ServiceError
 from lebihsini_greenproof.urgency import RecommendationScenario
 
 
+from lebihsini_greenproof.repositories import WorkflowRepository, ResourceRepository
+
 class RecommendationService:
-    def __init__(self, repository: InMemoryRepository, dataset: DemoDataset) -> None:
+    def __init__(self, repository: WorkflowRepository, dataset: DemoDataset, resource_repository: ResourceRepository | None = None) -> None:
         self.repository = repository
         self.dataset = dataset
+        self.resource_repository = resource_repository
 
     def create_recommendation(
         self,
@@ -32,7 +35,17 @@ class RecommendationService:
             confirmed_demand = self.repository.confirmation_demands.get(confirmed_demand_id)
             if confirmed_demand is None:
                 raise ServiceError("RESOURCE_NOT_FOUND", "Confirmed demand was not found.", status_code=404)
-        recommendation = generate_recommendation(self.dataset, demand=confirmed_demand)
+        
+        # Build the dynamic dataset from the resource repository if available
+        working_dataset = self.dataset
+        if self.resource_repository is not None:
+            working_dataset = replace(
+                self.dataset,
+                material_resources=self.resource_repository.list_materials(),
+                equipment_resources=self.resource_repository.list_equipment()
+            )
+
+        recommendation = generate_recommendation(working_dataset, demand=confirmed_demand)
         recommendation_id = self.repository.next_recommendation_id()
         recommendation = replace(recommendation, recommendation_id=recommendation_id)
         self.repository.recommendations[recommendation_id] = StoredRecommendation(
@@ -51,7 +64,16 @@ class RecommendationService:
         stored = self.repository.recommendations.get(recommendation_id)
         if stored is None:
             raise ServiceError("RECOMMENDATION_NOT_FOUND", "Recommendation was not found.", status_code=404)
-        recommendation = generate_recommendation(self.dataset, demand=stored.demand, scenario=scenario)
+            
+        working_dataset = self.dataset
+        if self.resource_repository is not None:
+            working_dataset = replace(
+                self.dataset,
+                material_resources=self.resource_repository.list_materials(),
+                equipment_resources=self.resource_repository.list_equipment()
+            )
+
+        recommendation = generate_recommendation(working_dataset, demand=stored.demand, scenario=scenario)
         next_id = self.repository.next_recommendation_id()
         recommendation = replace(recommendation, recommendation_id=next_id)
         self.repository.recommendations[next_id] = StoredRecommendation(

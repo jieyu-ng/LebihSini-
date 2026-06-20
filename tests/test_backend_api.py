@@ -10,6 +10,15 @@ class BackendApiTests(unittest.TestCase):
     def setUp(self) -> None:
         self.app = create_app()
         self.app.state.repository.reset()
+        
+        # Reseed demo resources because reset() clears them
+        dataset = self.app.state.dataset
+        for m in dataset.material_resources:
+            self.app.state.repository.material_passports[m.resource_id] = m
+        for e in dataset.equipment_resources:
+            self.app.state.repository.equipment_passports[e.resource_id] = e
+        self.app.state.repository.equipment_passports[dataset.commercial_equipment_fallback.resource_id] = dataset.commercial_equipment_fallback
+        
         self.client = TestClient(self.app)
 
     def test_health_reports_provider_mode_without_secrets(self) -> None:
